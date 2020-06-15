@@ -22,7 +22,7 @@ image:
 .PHONY: build
 build:
 	$(contain) build
-	cp -R build/buildroot/output/images/* release/*
+	cp -R build/buildroot/output/images/* release/
 
 .PHONY: fetch
 fetch:
