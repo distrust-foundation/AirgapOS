@@ -15,3 +15,5 @@ buildroot_ref=${BUILDROOT_REF?}
 mkdir -p "$build_dir"
 git clone "$buildroot_repo" "$buildroot_dir"
 git -C "$buildroot_dir" checkout "$buildroot_ref"
+cd "$buildroot_dir"
+make source
