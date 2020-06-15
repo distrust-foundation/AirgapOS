@@ -1,5 +1,5 @@
-NAME := unilinux
-IMAGE := polychain/$(NAME):latest
+NAME := airgap
+IMAGE := local/$(NAME):latest
 TARGET := qemu
 docker = docker
 executables = $(docker)
@@ -22,7 +22,7 @@ image:
 .PHONY: build
 build:
 	$(contain) build
-	cp -R build/buildroot/output/images/* release/
+	cp -R build/buildroot/output/images/bzImage release/
 
 .PHONY: fetch
 fetch:
