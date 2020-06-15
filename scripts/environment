@@ -1,0 +1,11 @@
+#!/bin/bash
+
+target=${TARGET?}
+env_file=${HOME}/config/config.env
+
+[ -f $env_file ] && export $( cat ${env_file} | xargs )
+
+export BUILD_DIR="${HOME}/build"
+export BR2_EXTERNAL="${HOME}/config/buildroot"
+export RELEASE_DIR="${HOME}/release"
+export BUILDROOT_REPO=git://git.busybox.net/buildroot

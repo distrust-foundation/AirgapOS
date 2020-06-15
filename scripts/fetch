@@ -1,0 +1,17 @@
+#!/bin/bash
+[ -f /.dockerenv ] || { echo "please run in supplied container"; exit 1; }
+set -e; source environment
+set -x
+
+build_dir="${BUILD_DIR?}"
+buildroot_dir="${build_dir}/buildroot"
+buildroot_repo="${BUILDROOT_REPO?}"
+buildroot_ref=${BUILDROOT_REF?}
+
+[[ -f ~/.gitconfig ]] || \
+	printf "[color]\nui=auto\n[user]\nemail=build@local\nname=Build User" \
+		> ~/.gitconfig
+
+mkdir -p "$build_dir"
+git clone "$buildroot_repo" "$buildroot_dir"
+git -C "$buildroot_dir" checkout "$buildroot_ref"
