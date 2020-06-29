@@ -22,7 +22,9 @@ image:
 .PHONY: build
 build:
 	$(contain) build
-	cp -R build/buildroot/output/images/bzImage release/
+	mkdir -p release/$(TARGET)/fw release/$(TARGET)/os
+	cp -R build/buildroot/output/images/bzImage release/$(TARGET)/os/
+	cp -R build/heads/build/$(TARGET)-coreboot/* release/$(TARGET)/fw/
 
 .PHONY: fetch
 fetch:

@@ -3,7 +3,10 @@
 set -e; source environment
 
 target=${TARGET?}
+build_dir="${BUILD_DIR?}"
+buildroot_dir="${build_dir}/buildroot"
+heads_dir="${build_dir}/heads"
 
-cd /home/build/build/buildroot
-make "airgap_${TARGET}_defconfig"
-make
+(cd "${heads_dir}"; make )
+
+(cd "${buildroot_dir}"; make )

@@ -9,3 +9,4 @@ export BUILD_DIR="${HOME}/build"
 export BR2_EXTERNAL="${HOME}/config/buildroot"
 export RELEASE_DIR="${HOME}/release"
 export BUILDROOT_REPO=git://git.busybox.net/buildroot
+export HEADS_REPO=https://github.com/osresearch/heads

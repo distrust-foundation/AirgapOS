@@ -6,6 +6,9 @@ build_dir="${BUILD_DIR?}"
 buildroot_dir="${build_dir}/buildroot"
 buildroot_repo="${BUILDROOT_REPO?}"
 buildroot_ref=${BUILDROOT_REF?}
+heads_dir="${build_dir}/heads"
+heads_repo="${HEADS_REPO?}"
+heads_ref=${HEADS_REF?}
 
 [[ -f ~/.gitconfig ]] || \
 	printf "[color]\nui=auto\n[user]\nemail=build@local\nname=Build User" \
@@ -20,3 +23,6 @@ git -C "$buildroot_dir" checkout "$buildroot_ref"
 cd "$buildroot_dir"
 make "airgap_${TARGET}_defconfig"
 make source
+
+git clone "$heads_repo" "$heads_dir"
+git -C "$heads_dir" checkout "$heads_ref"
