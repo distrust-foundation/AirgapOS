@@ -16,13 +16,15 @@ heads_ref=${HEADS_REF?}
 
 mkdir -p "$build_dir"
 
-[ "$(ls -A $build_dir)" ] && exit 0
-
-git clone "$buildroot_repo" "$buildroot_dir"
+[ "$(ls -A "${buildroot_dir}")" ] \
+	|| git clone "$buildroot_repo" "$buildroot_dir"
 git -C "$buildroot_dir" checkout "$buildroot_ref"
 cd "$buildroot_dir"
 make "airgap_${TARGET}_defconfig"
 make source
 
-git clone "$heads_repo" "$heads_dir"
+[ "$(ls -A "${heads_dir}")" ] \
+	|| git clone "$heads_repo" "$heads_dir"
 git -C "$heads_dir" checkout "$heads_ref"
+[ "$TARGET" == "librem13v4" ] \
+	&& (cd "$heads_dir/blobs/librem_kbl" && ./get_blobs.sh)

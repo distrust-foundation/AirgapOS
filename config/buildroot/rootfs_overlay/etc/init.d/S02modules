@@ -1,0 +1,22 @@
+#!/bin/sh
+
+[ -e /proc/ksyms -o -e /proc/modules ] || exit 0
+
+case "${1}" in
+	start)
+		[ -f /etc/modules ] || exit 0
+		while read module args; do
+			printf 'Loading module %s: ' "${module}"
+			modprobe ${module} ${args} >/dev/null
+			if [ $? -eq 0 ]; then
+				echo "OK"
+			else
+				echo "FAIL"
+		fi
+		done < /etc/sysconfig/modules
+		;;
+	*)
+		echo "Usage: ${0} {start}"
+		exit 1
+		;;
+esac

@@ -1,6 +1,6 @@
 NAME := airgap
 IMAGE := local/$(NAME):latest
-TARGET := qemu
+TARGET := librem13v4
 docker = docker
 executables = $(docker)
 
@@ -22,9 +22,11 @@ image:
 .PHONY: build
 build:
 	$(contain) build
-	mkdir -p release/$(TARGET)/fw release/$(TARGET)/os
-	cp -R build/buildroot/output/images/bzImage release/$(TARGET)/os/
-	cp -R build/heads/build/$(TARGET)-coreboot/* release/$(TARGET)/fw/
+	mkdir -p release/$(TARGET)
+	cp -R \
+		build/buildroot/output/images/rootfs.iso9660 \
+		release/$(TARGET)/airgap.iso
+	cp -R build/heads/build/$(TARGET)/coreboot.rom release/$(TARGET)/
 
 .PHONY: fetch
 fetch:

@@ -6,5 +6,4 @@ set -e
 qemu-system-i386 \
 	-M pc \
 	-nographic \
-	-append "console=ttyS0" \
-	-kernel "$HOME/release/bzImage"
+	-cdrom "${HOME}/release/${TARGET}/airgap.iso"
