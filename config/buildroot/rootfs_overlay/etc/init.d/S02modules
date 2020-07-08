@@ -13,7 +13,7 @@ case "${1}" in
 			else
 				echo "FAIL"
 		fi
-		done < /etc/sysconfig/modules
+		done < /etc/modules
 		;;
 	*)
 		echo "Usage: ${0} {start}"
