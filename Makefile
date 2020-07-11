@@ -1,6 +1,10 @@
 NAME := airgap
 IMAGE := local/$(NAME):latest
 TARGET := librem13v4
+GIT_DATETIME := \
+	$(shell git log -1 --format=%cd --date=format:'%Y-%m-%d %H:%M:%S')
+GIT_EPOCH := $(shell git log -1 --format=%at)
+OUT_DIR := build/buildroot/output/images
 docker = docker
 executables = $(docker)
 
@@ -23,10 +27,9 @@ image:
 build:
 	$(contain) build
 	mkdir -p release/$(TARGET)
-	cp -R \
-		build/buildroot/output/images/rootfs.iso9660 \
-		release/$(TARGET)/airgap.iso
-	cp -R build/heads/build/$(TARGET)/coreboot.rom release/$(TARGET)/
+	cp $(OUT_DIR)/rootfs.iso9660 release/$(TARGET)/airgap.iso
+	cp $(OUT_DIR)/rootfs.cpio release/$(TARGET)/initrd
+	cp $(OUT_DIR)/bzImage release/$(TARGET)/bzImage
 
 .PHONY: fetch
 fetch:
@@ -86,6 +89,8 @@ contain := \
 		--hostname "$(NAME)" \
 		--user $(userid):$(groupid) \
 		--env TARGET=$(TARGET) \
+		--env GIT_DATETIME="$(GIT_DATETIME)" \
+		--env GIT_EPOCH="$(GIT_EPOCH)" \
 		--security-opt seccomp=unconfined \
 		--volume $(PWD)/build:/home/build/build \
 		--volume $(PWD)/config:/home/build/config \
