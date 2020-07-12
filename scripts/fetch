@@ -20,6 +20,11 @@ mkdir -p "$build_dir"
 	|| git clone "$buildroot_repo" "$buildroot_dir"
 git -C "$buildroot_dir" checkout "$buildroot_ref"
 cd "$buildroot_dir"
+git reset --hard
+for patch in ${BR2_EXTERNAL}/patches/*; do
+	echo "Applying patch: ${patch}"
+	patch -p1 --no-backup-if-mismatch < "${patch}"
+done
 make "airgap_${TARGET}_defconfig"
 make source
 

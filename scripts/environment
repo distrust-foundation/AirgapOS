@@ -12,5 +12,4 @@ export BUILDROOT_REPO=git://git.busybox.net/buildroot
 export HEADS_REPO=https://source.puri.sm/coreboot/purism-heads.git
 export FAKETIME="@${GIT_DATETIME?}"
 export SOURCE_DATE_EPOCH="${GIT_EPOCH?}"
-export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1
 export ROOTFS_ISO9660_GENISOIMAGE_OPTS="-creation-date=${GIT_EPOCH} "
