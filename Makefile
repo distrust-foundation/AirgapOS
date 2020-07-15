@@ -53,6 +53,10 @@ shell:
 menuconfig:
 	$(contain) menuconfig
 
+.PHONY: menuconfig
+linux-menuconfig:
+	$(contain) linux-menuconfig
+
 .PHONY: vm
 vm:
 	$(contain) vm
