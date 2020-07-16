@@ -2,5 +2,10 @@
 
 set -u
 set -e
+set -x
 
-echo "post-build.sh was run"
+BOARD_DIR="$(dirname $0)"
+
+cp -f ${BOARD_DIR}/grub.cfg ${TARGET_DIR}/boot/grub/grub.cfg
+
+exit $?

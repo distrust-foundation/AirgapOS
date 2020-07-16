@@ -1,0 +1,22 @@
+#!/bin/sh
+
+case "${1}" in
+	start)
+		keymap="$( \
+			awk -F 'keymap=' '{sub(/ .*$/, "", $2); print $2}' /proc/cmdline \
+		)"
+		if [[ ! -z "$keymap" ]]; then
+			printf 'Loading Keymap %s: ' "${keymap}"
+			loadkeys "$keymap"
+			if [ $? -eq 0 ]; then
+				echo "OK"
+			else
+				echo "FAIL"
+			fi
+		fi
+		;;
+	*)
+		echo "Usage: ${0} {start}"
+		exit 1
+		;;
+esac
