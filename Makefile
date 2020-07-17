@@ -2,8 +2,16 @@ NAME := airgap
 IMAGE := local/$(NAME):latest
 TARGET := librem13v4
 GIT_DATETIME := \
-	$(shell git log -1 --format=%cd --date=format:'%Y-%m-%d %H:%M:%S')
-GIT_EPOCH := $(shell git log -1 --format=%at)
+	$(shell git log -1 --format=%cd --date=format:'%Y-%m-%d %H:%M:%S' config)
+GIT_REF := $(shell git log -1 --format=%H config)
+GIT_AUTHOR := $(shell git log -1 --format=%an config)
+GIT_KEY := $(shell git log -1 --format=%GP config)
+GIT_EPOCH := $(shell git log -1 --format=%at config)
+ifeq ($(strip $(shell git status --porcelain 2>/dev/null)),)
+	GIT_STATE=clean
+else
+	GIT_STATE=dirty
+endif
 OUT_DIR := build/buildroot/output/images
 docker = docker
 executables = $(docker)
@@ -95,6 +103,10 @@ contain := \
 		--env TARGET=$(TARGET) \
 		--env GIT_DATETIME="$(GIT_DATETIME)" \
 		--env GIT_EPOCH="$(GIT_EPOCH)" \
+		--env GIT_REF="$(GIT_REF)" \
+		--env GIT_AUTHOR="$(GIT_AUTHOR)" \
+		--env GIT_KEY="$(GIT_KEY)" \
+		--env GIT_STATE="$(GIT_STATE)" \
 		--security-opt seccomp=unconfined \
 		--volume $(PWD)/build:/home/build/build \
 		--volume $(PWD)/config:/home/build/config \
