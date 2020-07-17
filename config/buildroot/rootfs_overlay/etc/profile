@@ -5,20 +5,17 @@ source /etc/environment
 
 clear
 cat << "EOF"
-  ___       _                   _____ _____
- / _ \     (_)                 |  _  /  ___|
-/ /_\ \_ __ _  __ _  __ _ _ __ | | | \ `--.
-|  _  | '__| |/ _` |/ _` | '_ \| | | |`--. \
-| | | | |  | | (_| | (_| | |_) \ \_/ /\__/ /
-\_| |_/_|  |_|\__, |\__,_| .__/ \___/\____/
-               __/ |     | |
-              |___/      |_|
-
+      _    _                        ___  ____
+     / \  (_)_ __ __ _  __ _ _ __  / _ \/ ___|
+    / _ \ | | '__/ _` |/ _` | '_ \| | | \___ \
+   / ___ \| | | | (_| | (_| | |_) | |_| |___) |
+  /_/   \_\_|_|  \__, |\__,_| .__/ \___/|____/
+                 |___/      |_|
 EOF
-echo "Build Details:"
-echo " - Date: $GIT_DATETIME"
-echo " - Tree State: $GIT_STATE"
-echo " - Committer: $GIT_AUTHOR"
-echo " - Commit: $GIT_REF"
-echo " - Key: $GIT_KEY"
+echo " Build Details:"
+echo "  - Date: $GIT_DATETIME"
+echo "  - Tree State: $GIT_STATE"
+echo "  - Committer: $GIT_AUTHOR"
+echo "  - Commit: $GIT_REF"
+echo "  - Key: $GIT_KEY"
 echo ""
