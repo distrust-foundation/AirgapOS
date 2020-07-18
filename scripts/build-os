@@ -2,11 +2,7 @@
 [ -f /.dockerenv ] || { echo "please run in supplied container"; exit 1; }
 set -e; source environment
 
-target=${TARGET?}
 build_dir="${BUILD_DIR?}"
 buildroot_dir="${build_dir}/buildroot"
-heads_dir="${build_dir}/heads"
-
-(cd "${heads_dir}"; make BOARD="$TARGET")
 
 (cd "${buildroot_dir}"; make )
