@@ -5,5 +5,7 @@ set -e; source environment
 build_dir="${BUILD_DIR?}"
 release_dir="${RELEASE_DIR?}"
 
-[ -d "${build_dir}" ] && rm -rf ${build_dir}/*
-[ -d "${release_dir}" ] && rm -rf ${release_dir}/*
+[ -d "${build_dir}/buildroot" ] && (cd ${build_dir}/buildroot && make clean)
+[ -d "${build_dir}/heads" ] && (cd ${build_dir}/heads && make real.clean)
+[ -d "${build_dir}/buildroot-ccache" ] && rm -rf ${build_dir}/buildroot-ccache
+[ -d "${release_dir}" ] && rm -rf ${release_dir}/develop
