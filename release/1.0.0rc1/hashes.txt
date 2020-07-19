@@ -1,0 +1,3 @@
+SHA256(release/1.0.0rc1/librem13v4.rom)= 7a1a01c10aa23be3a961c295e791dbd9d7d1db59a5cf599521163ae2fd35a15f
+SHA256(release/1.0.0rc1/librem15v4.rom)= 85dbfbb107f90ee7a61107551641af92387d0b3a83feb86e3891a522d7d68e3a
+SHA256(release/1.0.0rc1/airgap_x86_64.iso)= a01046327cb61a39a515381b54f682f5acd94477c0ff8ef78cee1f2a677cbaca
