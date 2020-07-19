@@ -1,12 +1,15 @@
 NAME := airgap
 IMAGE := local/$(NAME):latest
-TARGET := librem13v4
-GIT_DATETIME := \
-	$(shell git log -1 --format=%cd --date=format:'%Y-%m-%d %H:%M:%S' config)
+TARGET := x86_64
+DEVICES := librem13v4 librem15v4
 GIT_REF := $(shell git log -1 --format=%H config)
 GIT_AUTHOR := $(shell git log -1 --format=%an config)
 GIT_KEY := $(shell git log -1 --format=%GP config)
 GIT_EPOCH := $(shell git log -1 --format=%at config)
+GIT_DATETIME := \
+	$(shell git log -1 --format=%cd --date=format:'%Y-%m-%d %H:%M:%S' config)
+VERSION := "develop"
+RELEASE_DIR := release/$(VERSION)
 ifeq ($(strip $(shell git status --porcelain 2>/dev/null)),)
 	GIT_STATE=clean
 else
@@ -21,7 +24,23 @@ executables = $(docker)
 ## Primary Targets
 
 .PHONY: all
-all: fetch build
+all: image fetch build hash
+
+.PHONY: build
+build: build-os build-fw
+
+.PHONY: verify
+verify:
+	mkdir -p build/verify/$(VERSION)
+	openssl sha256 $(RELEASE_DIR)/*.rom > build/verify/$(VERSION)/hashes.txt
+	openssl sha256 $(RELEASE_DIR)/*.iso >> build/verify/$(VERSION)/hashes.txt
+	diff -q build/verify/$(VERSION)/hashes.txt $(RELEASE_DIR)/hashes.txt;
+
+.PHONY: sign
+sign: $(RELEASE_DIR)/*.rom $(RELEASE_DIR)/*.iso
+	for file in $^; do \
+		gpg --armor --detach-sig "$${file}"; \
+	done
 
 .PHONY: image
 image:
@@ -31,14 +50,6 @@ image:
 		$(IMAGE_OPTIONS) \
 		$(PWD)
 
-.PHONY: build
-build:
-	$(contain) build
-	mkdir -p release/$(TARGET)
-	cp $(OUT_DIR)/rootfs.iso9660 release/$(TARGET)/airgap.iso
-	cp $(OUT_DIR)/rootfs.cpio release/$(TARGET)/initrd
-	cp $(OUT_DIR)/bzImage release/$(TARGET)/bzImage
-
 .PHONY: fetch
 fetch:
 	mkdir -p build release
@@ -47,6 +58,36 @@ fetch:
 .PHONY: clean
 clean:
 	$(contain) clean
+
+.PHONY: mrproper
+mrproper:
+	rm -rf build
+
+.PHONY: build-os
+build-os:
+	$(contain) build-os
+	mkdir -p $(RELEASE_DIR)
+	cp $(OUT_DIR)/rootfs.iso9660 $(RELEASE_DIR)/airgap_$(TARGET).iso
+
+.PHONY: build-fw
+build-fw:
+	$(contain) build-fw
+	mkdir -p $(RELEASE_DIR)
+	for device in $(DEVICES); do \
+		cp \
+			build/heads/build/$${device}/coreboot.rom \
+			$(RELEASE_DIR)/$${device}.rom ; \
+	done
+
+.PHONY: hash
+hash:
+	if [ ! -f release/$(VERSION)/hashes.txt ]; then \
+		openssl sha256 release/$(VERSION)/*.rom \
+			> release/$(VERSION)/hashes.txt; \
+		openssl sha256 release/$(VERSION)/*.iso \
+			>> release/$(VERSION)/hashes.txt; \
+	fi
+
 
 ## Development Targets
 
@@ -100,7 +141,8 @@ contain := \
 		--name "$(NAME)" \
 		--hostname "$(NAME)" \
 		--user $(userid):$(groupid) \
-		--env TARGET=$(TARGET) \
+		--env TARGET="$(TARGET)" \
+		--env DEVICES="$(DEVICES)" \
 		--env GIT_DATETIME="$(GIT_DATETIME)" \
 		--env GIT_EPOCH="$(GIT_EPOCH)" \
 		--env GIT_REF="$(GIT_REF)" \
