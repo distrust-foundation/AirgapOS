@@ -1,0 +1,36 @@
+menu "Flashtools"
+
+config BR2_PACKAGE_FLASHTOOLS
+	bool "flashtools"
+
+config BR2_PACKAGE_FLASHTOOLS_FLASHTOOL
+	bool "flashtool"
+	select BR2_PACKAGE_FLASHTOOLS
+	help
+      Todo
+
+config BR2_PACKAGE_FLASHTOOLS_PEEK
+	bool "peek"
+	select BR2_PACKAGE_FLASHTOOLS
+	help
+      Todo
+
+config BR2_PACKAGE_FLASHTOOLS_POKE
+	bool "poke"
+	select BR2_PACKAGE_FLASHTOOLS
+	help
+      Todo
+
+config BR2_PACKAGE_FLASHTOOLS_CBFS
+	bool "cbfs"
+	select BR2_PACKAGE_FLASHTOOLS
+	help
+      Todo
+
+config BR2_PACKAGE_FLASHTOOLS_UEFI
+	bool "uefi"
+	select BR2_PACKAGE_FLASHTOOLS
+	help
+      Todo
+
+endmenu

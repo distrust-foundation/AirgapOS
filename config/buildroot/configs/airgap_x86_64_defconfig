@@ -4135,3 +4135,13 @@ BR2_LINUX_KERNEL_CUSTOM_GIT_VERSION=""
 #
 # Linux distribution for offline cryptography use cases (in /home/build/config/buildroot)
 #
+
+#
+# Flashtools
+#
+BR2_PACKAGE_FLASHTOOLS=y
+# BR2_PACKAGE_FLASHTOOLS_FLASHTOOL is not set
+# BR2_PACKAGE_FLASHTOOLS_PEEK is not set
+# BR2_PACKAGE_FLASHTOOLS_POKE is not set
+BR2_PACKAGE_FLASHTOOLS_CBFS=y
+# BR2_PACKAGE_FLASHTOOLS_UEFI is not set

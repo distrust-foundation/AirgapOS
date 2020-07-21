@@ -1,0 +1,19 @@
+#!/bin/sh
+
+case "${1}" in
+	start)
+		printf 'Loading firmware signing key from Coreboot CBFS: '
+		mkdir -p /.gnupg
+		cbfs -r heads/initrd/.gnupg/pubring.kbx > /.gnupg/pubring.kbx
+		cbfs -r heads/initrd/.gnupg/trustdb.gpg > /.gnupg/trustdb.gpg
+		if [ $? -eq 0 ]; then
+			echo "OK"
+		else
+			echo "FAIL"
+		fi
+		;;
+	*)
+		echo "Usage: ${0} {start}"
+		exit 1
+		;;
+esac
