@@ -51,11 +51,18 @@ RUN chown root:root /usr/local/bin/fixuid \
     && printf "user: build\ngroup: build\npaths:\n  - /\n  - /home/build/build\n" > /etc/fixuid/config.yml
 ENTRYPOINT ["/usr/local/bin/fixuid", "-q"]
 
-## Install packages from packages.list
+## Install packages from packages.list with retry
+ADD config/container/sources.list /etc/apt/sources.list
 ADD config/container/packages.list /etc/apt/packages.list
-RUN apt update -y \
-    && apt install -y $(cat /etc/apt/packages.list) \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN echo ' \
+    set -e; \
+    apt-get update; \
+    until apt-get install -y $(cat /etc/apt/packages.list); do \
+        echo "apt install failed. Likely throttled. Retrying in 10 mins..."; \
+        sleep 600; \
+    done; \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*;' \
+| bash
 
 ## Create build user with sudo privs
 RUN useradd -G plugdev,sudo -ms /bin/bash build \
