@@ -119,11 +119,15 @@ update-packages:
 		--user $(userid):$(groupid) \
 		--volume $(PWD)/config:/home/build/config \
 		--volume $(PWD)/scripts:/home/build/scripts \
+		--env GIT_EPOCH="$(GIT_EPOCH)" \
 		$(IMAGE) tail -f /dev/null
 	$(docker) exec -it --user=root "$(NAME)" update-packages
 	$(docker) cp \
 		"$(NAME):/etc/apt/packages.list" \
 		"$(PWD)/config/container/packages.list"
+	$(docker) cp \
+		"$(NAME):/etc/apt/sources.list" \
+		"$(PWD)/config/container/sources.list"
 	$(docker) rm -f "$(NAME)"
 
 ## Make Helpers

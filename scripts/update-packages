@@ -1,8 +1,15 @@
 #!/bin/bash
+[ -f /.dockerenv ] || { echo "please run in supplied container"; exit 1; }
 set -e
 
 apt update -y
-
 apt upgrade -y
 
 dpkg -l | awk '{ if ($1 == "ii") print $2 "=" $3 }' > /etc/apt/packages.list
+
+snapshot_date=$(date -d @${GIT_EPOCH} +"%Y%m%dT000000Z")
+cat <<-EOF > /etc/apt/sources.list
+deb http://snapshot.debian.org/archive/debian/${snapshot_date} buster main
+deb http://snapshot.debian.org/archive/debian-security/${snapshot_date} buster/updates main
+deb http://snapshot.debian.org/archive/debian/${snapshot_date} buster-updates main
+EOF
