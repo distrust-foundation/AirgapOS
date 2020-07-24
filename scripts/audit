@@ -9,18 +9,47 @@ heads_dir="${build_dir}/heads"
 
 mkdir -p ${audit_dir}
 
-echo version "${VERSION}"
+printf "Generating OS source tar hashes... "
 openssl sha256 -r ${buildroot_dir}/dl/*/*.tar.* > ${audit_dir}/os_src_hashes.txt
-openssl sha256 -r ${heads_dir}/packages/* > ${audit_dir}/fw_src_hashes.txt
+echo "done"
 
+printf "Generating firmware source tar hashes... "
+openssl sha256 -r ${heads_dir}/packages/* > ${audit_dir}/fw_src_hashes.txt
+echo "done"
+
+printf "Generating combined/uniqued source tar hashes... "
 cat ${audit_dir}/os_src_hashes.txt \
 	${audit_dir}/fw_src_hashes.txt \
 	| sed 's/ .*\// /g' \
 	| awk '{ t = $1; $1 = $2; $2 = t; print;}' \
 	| sort \
 	| uniq \
-	> ${audit_dir}/hashes.txt
+	> ${audit_dir}/all_hashes.txt
+echo "done"
 
-(cd ${buildroot_dir} && make cpe-info legal-info)
+printf "Generating buildroot package stats... "
+( cd ${buildroot_dir} \
+	&& support/scripts/pkg-stats --json ${audit_dir}/pkg-stats.json \
+	> /dev/null 2>&1
+)
+echo "done"
+
+printf "Generating NIST CPE definitions... "
+( cd ${buildroot_dir} && make cpe-info > /dev/null 2>&1 )
 cp ${buildroot_dir}/output/cpe-manifest.csv ${audit_dir}/cpe-manifest.csv
+echo "done"
+
+printf "Generating license usage reports... "
+( cd ${buildroot_dir} && make legal-info > /dev/null 2>&1 )
 cp -R ${buildroot_dir}/output/legal-info ${audit_dir}/legal-info
+echo "done"
+
+echo "Wrote: build/audit/os_src_hashes.txt"
+echo "Wrote: build/audit/fw_src_hashes.txt"
+echo "Wrote: build/audit/all_hashes.txt"
+echo "Wrote: build/audit/pkg-stats.json"
+echo "Wrote: build/audit/cpe-manifest.cve"
+echo "Wrote: build/audit/legal-info"
+
+total_cves=$(cat build/audit/pkg-stats.json | jq '.stats["total-cves"]')
+printf "Total CVEs: ${total_cves}"
