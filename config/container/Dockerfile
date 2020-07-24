@@ -54,6 +54,7 @@ ENTRYPOINT ["/usr/local/bin/fixuid", "-q"]
 ## Install packages from packages.list with retry
 ADD config/container/sources.list /etc/apt/sources.list
 ADD config/container/packages.list /etc/apt/packages.list
+run echo 'Acquire::http::Timeout "30";' >> /etc/apt/apt.conf.d/99apt.conf
 RUN echo ' \
     set -e; \
     apt-get update; \
