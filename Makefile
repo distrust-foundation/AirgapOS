@@ -29,19 +29,6 @@ all: image fetch build hash
 .PHONY: build
 build: build-os build-fw
 
-.PHONY: verify
-verify:
-	mkdir -p build/verify/$(VERSION)
-	openssl sha256 $(RELEASE_DIR)/*.rom > build/verify/$(VERSION)/hashes.txt
-	openssl sha256 $(RELEASE_DIR)/*.iso >> build/verify/$(VERSION)/hashes.txt
-	diff -q build/verify/$(VERSION)/hashes.txt $(RELEASE_DIR)/hashes.txt;
-
-.PHONY: sign
-sign: $(RELEASE_DIR)/*.rom $(RELEASE_DIR)/*.iso
-	for file in $^; do \
-		gpg --armor --detach-sig "$${file}"; \
-	done
-
 .PHONY: image
 image:
 	$(docker) build \
@@ -61,6 +48,7 @@ clean:
 
 .PHONY: mrproper
 mrproper:
+	docker image rm -f $(IMAGE)
 	rm -rf build
 
 .PHONY: build-os
@@ -79,14 +67,35 @@ build-fw:
 			$(RELEASE_DIR)/$${device}.rom ; \
 	done
 
+## Release Targets
+
+.PHONY: audit
+audit:
+	$(contain) audit
+
 .PHONY: hash
 hash:
 	if [ ! -f release/$(VERSION)/hashes.txt ]; then \
-		openssl sha256 release/$(VERSION)/*.rom \
+		openssl sha256 -r release/$(VERSION)/*.rom \
 			> release/$(VERSION)/hashes.txt; \
-		openssl sha256 release/$(VERSION)/*.iso \
+		openssl sha256 -r release/$(VERSION)/*.iso \
 			>> release/$(VERSION)/hashes.txt; \
 	fi
+
+.PHONY: verify
+verify:
+	mkdir -p build/verify/$(VERSION)
+	openssl sha256 -r $(RELEASE_DIR)/*.rom \
+		> build/stats/$(VERSION)/release_hashes.txt
+	openssl sha256 -r $(RELEASE_DIR)/*.iso \
+		>> build/stats/$(VERSION)/release_hashes.txt
+	diff -q build/stats/$(VERSION)/release_hashes.txt $(RELEASE_DIR)/hashes.txt;
+
+.PHONY: sign
+sign: $(RELEASE_DIR)/*.rom $(RELEASE_DIR)/*.iso
+	for file in $^; do \
+		gpg --armor --detach-sig "$${file}"; \
+	done
 
 
 ## Development Targets
