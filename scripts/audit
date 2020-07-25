@@ -9,12 +9,24 @@ heads_dir="${build_dir}/heads"
 
 mkdir -p ${audit_dir}
 
-printf "Generating OS source tar hashes... "
-openssl sha256 -r ${buildroot_dir}/dl/*/*.tar.* > ${audit_dir}/os_src_hashes.txt
+printf "Generating container package vulnerability stats... "
+debsecan \
+	--suite $(lsb_release --codename --short) \
+	--format detail \
+	> ${audit_dir}/container_package_cves.txt
+container_package_cves="$( \
+	cat ${audit_dir}/container_package_cves.txt | grep CVE | wc -l \
+)"
+echo "done"
+
+printf "Generating target OS source tar hashes... "
+openssl sha256 -r ${buildroot_dir}/dl/*/*.tar.* \
+	> ${audit_dir}/os_src_hashes.txt
 echo "done"
 
 printf "Generating firmware source tar hashes... "
-openssl sha256 -r ${heads_dir}/packages/* > ${audit_dir}/fw_src_hashes.txt
+openssl sha256 -r ${heads_dir}/packages/* \
+	> ${audit_dir}/fw_src_hashes.txt
 echo "done"
 
 printf "Generating combined/uniqued source tar hashes... "
@@ -32,6 +44,9 @@ printf "Generating buildroot package stats... "
 	&& support/scripts/pkg-stats --json ${audit_dir}/pkg-stats.json \
 	> /dev/null 2>&1
 )
+target_os_source_cves=$( \
+	cat build/audit/pkg-stats.json | jq '.stats["total-cves"]' \
+)
 echo "done"
 
 printf "Generating NIST CPE definitions... "
@@ -43,13 +58,14 @@ printf "Generating license usage reports... "
 ( cd ${buildroot_dir} && make legal-info > /dev/null 2>&1 )
 cp -R ${buildroot_dir}/output/legal-info ${audit_dir}/legal-info
 echo "done"
-
+echo "------------------------------------------------"
+echo "Wrote: build/audit/container_package_cves.txt"
 echo "Wrote: build/audit/os_src_hashes.txt"
 echo "Wrote: build/audit/fw_src_hashes.txt"
 echo "Wrote: build/audit/all_hashes.txt"
 echo "Wrote: build/audit/pkg-stats.json"
 echo "Wrote: build/audit/cpe-manifest.cve"
 echo "Wrote: build/audit/legal-info"
-
-total_cves=$(cat build/audit/pkg-stats.json | jq '.stats["total-cves"]')
-printf "Total CVEs: ${total_cves}"
+echo "------------------------------------------------"
+echo "Build container package CVEs: ${container_package_cves}"
+echo "Target OS source CVEs: ${target_os_source_cves}"

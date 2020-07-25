@@ -71,6 +71,7 @@ build-fw:
 
 .PHONY: audit
 audit:
+	mkdir -p build/audit
 	$(contain) audit
 
 .PHONY: hash
