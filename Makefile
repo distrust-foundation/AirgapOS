@@ -85,12 +85,12 @@ hash:
 
 .PHONY: verify
 verify:
-	mkdir -p build/verify/$(VERSION)
+	mkdir -p build/audit/$(VERSION)
 	openssl sha256 -r $(RELEASE_DIR)/*.rom \
-		> build/stats/$(VERSION)/release_hashes.txt
+		> build/audit/$(VERSION)/release_hashes.txt
 	openssl sha256 -r $(RELEASE_DIR)/*.iso \
-		>> build/stats/$(VERSION)/release_hashes.txt
-	diff -q build/stats/$(VERSION)/release_hashes.txt $(RELEASE_DIR)/hashes.txt;
+		>> build/audit/$(VERSION)/release_hashes.txt
+	diff -q build/audit/$(VERSION)/release_hashes.txt $(RELEASE_DIR)/hashes.txt;
 
 .PHONY: sign
 sign: $(RELEASE_DIR)/*.rom $(RELEASE_DIR)/*.iso
