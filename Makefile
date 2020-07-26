@@ -94,8 +94,15 @@ verify:
 
 .PHONY: sign
 sign: $(RELEASE_DIR)/*.rom $(RELEASE_DIR)/*.iso
+	set -e; \
 	for file in $^; do \
 		gpg --armor --detach-sig "$${file}"; \
+		fingerprint=$$(\
+			gpg --list-packets $${file}.asc \
+				| grep "issuer key ID" \
+				| sed 's/.*\([A-Z0-9]\{16\}\).*/\1/g' \
+		); \
+		mv $${file}.asc $${file}.$${fingerprint}.asc; \
 	done
 
 
