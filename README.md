@@ -85,13 +85,19 @@ internet with high integrity on the supply chain of the firmware and OS used.
 
 ## Release ##
 
-1. Verify then make detached signature of given release build with:
+1. Audit dependencies to ensure no relevant CVEs are open at the moment:
+
+    ```
+    make audit
+    ```
+
+2. Verify and add detached signature to given release with:
 
     ```
     make VERSION=1.0.0rc1 verify sign
     ```
 
-2. Commit signatures.
+3. Commit signatures.
 
 
 ## Development ##
