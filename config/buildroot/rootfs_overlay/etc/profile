@@ -1,6 +1,7 @@
 export EDITOR=/bin/vi
-export PATH="/bin:/sbin:/usr/bin:/usr/sbin"
+export PATH="/usr/local/bin:/bin:/sbin:/usr/bin:/usr/sbin"
 export PS1="[\h \t] \\$ "
+export GNUPGHOME=/.gnupg
 source /etc/environment
 
 clear

@@ -1,0 +1,17 @@
+#!/bin/bash
+set -e
+source /etc/profile
+
+folder=${1?}
+
+if [ -f "${folder}/autorun.sh.asc" ]; then
+	echo "++ Autorun: Found ${folder}/autorun.sh" >/dev/console;
+	gpg --verify "${folder}/autorun.sh.asc" || {
+		echo "!! Autorun: Verification Failed for ${folder}/autorun.sh" \
+			>/dev/console;
+		exit 1;
+	}
+	echo "++ Autorun: Verified ${folder}/autorun.sh" >/dev/console
+	echo "** Autorun: Executing ${folder}/autorun.sh" >/dev/console
+	/bin/bash "${folder}/autorun.sh" >/dev/console
+fi

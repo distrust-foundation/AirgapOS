@@ -6,6 +6,15 @@ case "${1}" in
 		mkdir -p /.gnupg
 		cbfs -r heads/initrd/.gnupg/pubring.kbx > /.gnupg/pubring.kbx
 		cbfs -r heads/initrd/.gnupg/trustdb.gpg > /.gnupg/trustdb.gpg
+		fingerprint=$( \
+			gpg \
+				--list-keys \
+				--list-options no-show-unusable-uids \
+				--with-colons \
+			| awk -F: '$1 == "fpr" {print $10;}' \
+			| head -n1 \
+		)
+		echo "export HEADS_KEY=${fingerprint}" >> /etc/environment
 		if [ $? -eq 0 ]; then
 			echo "OK"
 		else
