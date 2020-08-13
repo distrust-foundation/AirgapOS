@@ -6,9 +6,13 @@ build_dir="${BUILD_DIR?}"
 buildroot_dir="${build_dir}/buildroot"
 buildroot_repo="${BUILDROOT_REPO?}"
 buildroot_ref=${BUILDROOT_REF?}
+buildroot_external=${BR2_EXTERNAL?}
 heads_dir="${build_dir}/heads"
 heads_repo="${HEADS_REPO?}"
 heads_ref=${HEADS_REF?}
+heads_external=${HEADS_EXTERNAL?}
+devices=${DEVICES?}
+target=${TARGET?}
 
 [[ -f ~/.gitconfig ]] || \
 	printf "[color]\nui=auto\n[user]\nemail=build@local\nname=Build User" \
@@ -18,18 +22,29 @@ mkdir -p "$build_dir"
 
 [ "$(ls -A "${buildroot_dir}")" ] \
 	|| git clone "$buildroot_repo" "$buildroot_dir"
+git -C "$buildroot_dir" reset --hard
 git -C "$buildroot_dir" checkout "$buildroot_ref"
-cd "$buildroot_dir"
-git reset --hard
-for patch in ${BR2_EXTERNAL}/patches/*; do
-	echo "Applying patch: ${patch}"
-	patch -p1 --no-backup-if-mismatch < "${patch}"
-done
-make "airgap_${TARGET}_defconfig"
-make source
+(
+	cd $buildroot_dir;
+	for patch in "${buildroot_external}"/patches/*; do
+		echo "Applying patch: ${patch}";
+		patch -p1 --no-backup-if-mismatch < "${patch}";
+	done;
+	make "airgap_${target}_defconfig";
+	make source;
+)
 
 [ "$(ls -A "${heads_dir}")" ] \
 	|| git clone "$heads_repo" "$heads_dir"
+git -C "$buildroot_dir" reset --hard
 git -C "$heads_dir" checkout "$heads_ref"
-[[ "$DEVICES" =~ "librem" ]] \
-	&& (cd "$heads_dir/blobs/librem_kbl" && ./get_blobs.sh)
+(
+	cd "$heads_dir";
+	for patch in "${heads_external}"/patches/*; do
+		echo "Applying patch: ${patch}"
+		patch -p1 --no-backup-if-mismatch < "${patch}"
+	done
+	rsync -Pav "${heads_external}/boards/" "${heads_dir}/boards/"
+	[[ "$devices" =~ "librem" ]] \
+		&& (cd "$heads_dir/blobs/librem_kbl" && ./get_blobs.sh)
+)

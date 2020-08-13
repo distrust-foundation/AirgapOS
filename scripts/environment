@@ -7,6 +7,7 @@ env_file=${HOME}/config/config.env
 
 export BUILD_DIR="${HOME}/build"
 export BR2_EXTERNAL="${HOME}/config/buildroot"
+export HEADS_EXTERNAL="${HOME}/config/heads"
 export RELEASE_DIR="${HOME}/release"
 export BUILDROOT_REPO=git://git.busybox.net/buildroot
 export HEADS_REPO=https://source.puri.sm/coreboot/purism-heads.git

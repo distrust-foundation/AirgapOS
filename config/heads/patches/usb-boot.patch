@@ -1,0 +1,17 @@
+diff --git a/initrd/init b/initrd/init
+index bb39dec..975d041 100755
+--- a/initrd/init
++++ b/initrd/init
+@@ -48,6 +48,11 @@ if [ ! -e /dev/tpm0 ]; then
+   export CONFIG_TPM='n'
+ fi
+ 
++if [ "$CONFIG_BOOT_USB" = "y" ]; then
++    insmod /lib/modules/usb-storage.ko >/dev/null 2>&1 \
++    || echo "usb_storage: module load failed"
++fi
++
+ if [ "$CONFIG_COREBOOT" = "y" ]; then
+        /bin/cbfs-init
+ fi
+
