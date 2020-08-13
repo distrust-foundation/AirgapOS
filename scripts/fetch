@@ -22,10 +22,10 @@ mkdir -p "$build_dir"
 
 [ "$(ls -A "${buildroot_dir}")" ] \
 	|| git clone "$buildroot_repo" "$buildroot_dir"
-git -C "$buildroot_dir" reset --hard
-git -C "$buildroot_dir" checkout "$buildroot_ref"
 (
 	cd $buildroot_dir;
+	git checkout "$buildroot_ref"
+	git reset --hard
 	for patch in "${buildroot_external}"/patches/*; do
 		echo "Applying patch: ${patch}";
 		patch -p1 --no-backup-if-mismatch < "${patch}";
@@ -36,10 +36,10 @@ git -C "$buildroot_dir" checkout "$buildroot_ref"
 
 [ "$(ls -A "${heads_dir}")" ] \
 	|| git clone "$heads_repo" "$heads_dir"
-git -C "$buildroot_dir" reset --hard
-git -C "$heads_dir" checkout "$heads_ref"
 (
 	cd "$heads_dir";
+	git checkout "$heads_ref"
+	git reset --hard
 	for patch in "${heads_external}"/patches/*; do
 		echo "Applying patch: ${patch}"
 		patch -p1 --no-backup-if-mismatch < "${patch}"
