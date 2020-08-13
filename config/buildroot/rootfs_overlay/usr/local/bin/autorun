@@ -5,8 +5,9 @@ source /etc/profile
 folder=${1?}
 
 if [ -f "${folder}/autorun.sh.asc" ]; then
+	echo "" >/dev/console
 	echo "++ Autorun: Found ${folder}/autorun.sh" >/dev/console;
-	gpg --verify "${folder}/autorun.sh.asc" || {
+	gpg --verify "${folder}/autorun.sh.asc" >/dev/null 2>&1 || {
 		echo "!! Autorun: Verification Failed for ${folder}/autorun.sh" \
 			>/dev/console;
 		exit 1;

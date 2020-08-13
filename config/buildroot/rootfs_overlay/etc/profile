@@ -4,6 +4,7 @@ export PS1="[\h \t] \\$ "
 export GNUPGHOME=/.gnupg
 source /etc/environment
 
+dmesg -n1
 clear
 cat << "EOF"
       _    _                        ___  ____
