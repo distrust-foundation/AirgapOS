@@ -1,17 +1,80 @@
-diff --git a/initrd/init b/initrd/init
-index bb39dec..975d041 100755
---- a/initrd/init
-+++ b/initrd/init
-@@ -48,6 +48,11 @@ if [ ! -e /dev/tpm0 ]; then
-   export CONFIG_TPM='n'
- fi
- 
-+if [ "$CONFIG_BOOT_USB" = "y" ]; then
-+    insmod /lib/modules/usb-storage.ko >/dev/null 2>&1 \
-+    || echo "usb_storage: module load failed"
-+fi
+diff --git a/initrd/bin/gui-init b/initrd/bin/gui-init
+index a7f97ab..f1562a9 100755
+--- a/initrd/bin/gui-init
++++ b/initrd/bin/gui-init
+@@ -13,6 +13,11 @@ mount_boot()
+   
+   # Mount local disk if it is not already mounted
+   while ! grep -q /boot /proc/mounts ; do
 +
- if [ "$CONFIG_COREBOOT" = "y" ]; then
-        /bin/cbfs-init
++	if [ "$CONFIG_BOOT_USB" = "y" ]; then
++	    enable_usb
++	fi
++
+     # ensure default boot device is set
+     if [ ! -e "$CONFIG_BOOT_DEV" ]; then
+       if (whiptail $CONFIG_ERROR_BG_COLOR --clear --title "ERROR: $CONFIG_BOOT_DEV missing!" \
+diff --git a/initrd/bin/mount-usb b/initrd/bin/mount-usb
+index 266f9dd..556d66e 100755
+--- a/initrd/bin/mount-usb
++++ b/initrd/bin/mount-usb
+@@ -4,19 +4,6 @@
+ 
+ enable_usb
+ 
+-if ! lsmod | grep -q usb_storage; then
+-  count=$(ls /dev/sd* 2>/dev/null | wc -l)
+-  timeout=0
+-  echo "Scanning for USB storage devices..."
+-  insmod /lib/modules/usb-storage.ko >/dev/null 2>&1 \
+-  || die "usb_storage: module load failed"
+-  while [[ $count == $(ls /dev/sd* 2>/dev/null | wc -l) ]]; do 
+-    [[ $timeout -ge 4 ]] && break
+-    sleep 1
+-    timeout=$(($timeout+1))
+-  done
+-fi
+-
+ if [ ! -d /media ]; then
+   mkdir /media
  fi
-
+diff --git a/initrd/bin/usb-scan b/initrd/bin/usb-scan
+index a9debdf..6f10a30 100755
+--- a/initrd/bin/usb-scan
++++ b/initrd/bin/usb-scan
+@@ -4,12 +4,6 @@ set -e -o pipefail
+ . /etc/functions
+ . /tmp/config
+ 
+-# Unmount any previous boot device
+-if grep -q /boot /proc/mounts ; then
+-	umount /boot \
+-		|| die "Unable to unmount /boot"
+-fi
+-
+ # Mount the USB boot device
+ if ! grep -q /media /proc/mounts ; then
+ 	mount-usb "$CONFIG_USB_BOOT_DEV" \
+diff --git a/initrd/etc/functions b/initrd/etc/functions
+index 0c7e950..d8f4e33 100755
+--- a/initrd/etc/functions
++++ b/initrd/etc/functions
+@@ -116,6 +116,18 @@ enable_usb()
+ 		|| die "xhci_pci: module load failed"
+ 		sleep 2
+ 	fi
++	if ! lsmod | grep -q usb_storage; then
++	  count=$(ls /dev/sd* 2>/dev/null | wc -l)
++	  timeout=0
++	  echo "Scanning for USB storage devices..."
++	  insmod /lib/modules/usb-storage.ko >/dev/null 2>&1 \
++	  || die "usb_storage: module load failed"
++	  while [[ $count == $(ls /dev/sd* 2>/dev/null | wc -l) ]]; do 
++	    [[ $timeout -ge 4 ]] && break
++	    sleep 1
++	    timeout=$(($timeout+1))
++	  done
++	fi
+ }
+ 
+ confirm_gpg_card()
