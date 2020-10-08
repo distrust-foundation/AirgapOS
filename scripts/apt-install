@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e;
+
+apt-get update
+until apt-get install -y $(cat /etc/apt/packages.list); do
+    echo "apt install failed. Likely throttled. Retrying in 10 mins...";
+    sleep 600;
+done;
+
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*;

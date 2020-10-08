@@ -31,7 +31,7 @@ build: build-os build-fw
 
 .PHONY: image
 image:
-	$(docker) build \
+	DOCKER_BUILDKIT=1 $(docker) build \
 		--tag $(IMAGE) \
 		--file $(PWD)/config/container/Dockerfile \
 		$(IMAGE_OPTIONS) \
@@ -129,23 +129,25 @@ vm:
 
 .PHONY: update-packages
 update-packages:
-	$(docker) run \
+	docker rm -f "$(NAME)-update-packages" || :
+	docker run \
 		--rm \
 		--detach \
-		--name "$(NAME)" \
+		--name "$(NAME)-update-packages" \
 		--user $(userid):$(groupid) \
-		--volume $(PWD)/config:/home/build/config \
-		--volume $(PWD)/scripts:/home/build/scripts \
 		--env GIT_EPOCH="$(GIT_EPOCH)" \
-		$(IMAGE) tail -f /dev/null
-	$(docker) exec -it --user=root "$(NAME)" update-packages
-	$(docker) cp \
-		"$(NAME):/etc/apt/packages.list" \
+		--volume $(PWD)/config/container/packages.list:/etc/apt/packages-old.list \
+		--volume $(PWD)/config/container/apt.conf:/etc/apt/apt.conf \
+		--volume $(PWD)/scripts:/usr/local/bin \
+		debian tail -f /dev/null
+	docker exec -it --user=root "$(NAME)-update-packages" update-packages
+	docker cp \
+		"$(NAME)-update-packages:/etc/apt/packages.list" \
 		"$(PWD)/config/container/packages.list"
-	$(docker) cp \
-		"$(NAME):/etc/apt/sources.list" \
+	docker cp \
+		"$(NAME)-update-packages:/etc/apt/sources.list" \
 		"$(PWD)/config/container/sources.list"
-	$(docker) rm -f "$(NAME)"
+	docker rm -f "$(NAME)-update-packages"
 
 ## Make Helpers
 

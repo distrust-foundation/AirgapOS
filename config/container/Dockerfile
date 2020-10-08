@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:experimental
 ARG DEBIAN_IMAGE_HASH=4ab3309ba955211d1db92f405be609942b595a720de789286376f030502ffd6f
 ARG GOLANG_IMAGE_HASH=84349ee862d8bafff35e0d2bfd539da565b536b4dfce654773fc21a1db2da6d7
 
@@ -51,20 +52,13 @@ RUN chown root:root /usr/local/bin/fixuid \
     && printf "user: build\ngroup: build\npaths:\n  - /\n  - /home/build/build\n" > /etc/fixuid/config.yml
 ENTRYPOINT ["/usr/local/bin/fixuid", "-q"]
 
+ADD scripts/ /usr/local/bin/
+
 ## Install packages from packages.list with retry
 ADD config/container/sources.list /etc/apt/sources.list
 ADD config/container/packages.list /etc/apt/packages.list
-run echo 'Acquire::http::Timeout "30";' >> /etc/apt/apt.conf.d/99apt.conf
-run echo 'Acquire::Check-Valid-Until "false";' >> /etc/apt/apt.conf.d/99apt.conf
-RUN echo ' \
-    set -e; \
-    apt-get update; \
-    until apt-get install -y $(cat /etc/apt/packages.list); do \
-        echo "apt install failed. Likely throttled. Retrying in 10 mins..."; \
-        sleep 600; \
-    done; \
-    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*;' \
-| bash
+ADD config/container/apt.conf /etc/apt/apt.conf
+RUN apt-install
 
 ## Create build user with sudo privs
 RUN useradd -G plugdev,sudo -ms /bin/bash build \
