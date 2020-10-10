@@ -31,7 +31,7 @@ build: build-os build-fw
 
 .PHONY: image
 image:
-	DOCKER_BUILDKIT=1 $(docker) build \
+	$(docker) build \
 		--tag $(IMAGE) \
 		--file $(PWD)/config/container/Dockerfile \
 		$(IMAGE_OPTIONS) \
