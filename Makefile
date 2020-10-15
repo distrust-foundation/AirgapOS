@@ -111,7 +111,7 @@ sign: $(RELEASE_DIR)/*.rom $(RELEASE_DIR)/*.iso
 .PHONY: shell
 shell:
 	$(docker) inspect "$(NAME)" \
-	&& $(docker) exec --interactive --tty "$(NAME)" shell \
+	&& $(docker) exec --interactive --user=root --tty "$(NAME)" shell \
 	|| $(contain) shell
 
 
@@ -119,7 +119,7 @@ shell:
 menuconfig:
 	$(contain) menuconfig
 
-.PHONY: menuconfig
+.PHONY: linux-menuconfig
 linux-menuconfig:
 	$(contain) linux-menuconfig
 
@@ -163,7 +163,6 @@ contain := \
 		--interactive \
 		--name "$(NAME)" \
 		--hostname "$(NAME)" \
-		--user $(userid):$(groupid) \
 		--env TARGET="$(TARGET)" \
 		--env DEVICES="$(DEVICES)" \
 		--env GIT_DATETIME="$(GIT_DATETIME)" \
@@ -172,7 +171,8 @@ contain := \
 		--env GIT_AUTHOR="$(GIT_AUTHOR)" \
 		--env GIT_KEY="$(GIT_KEY)" \
 		--env GIT_STATE="$(GIT_STATE)" \
-		--security-opt seccomp=unconfined \
+		--env UID="$(shell id -u)" \
+		--env GID="$(shell id -g)" \
 		--volume $(PWD)/build:/home/build/build \
 		--volume $(PWD)/config:/home/build/config \
 		--volume $(PWD)/release:/home/build/release \
