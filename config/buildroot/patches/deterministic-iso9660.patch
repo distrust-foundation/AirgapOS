@@ -1,12 +1,14 @@
 diff --git a/fs/iso9660/iso9660.mk b/fs/iso9660/iso9660.mk
-index a129655ce3..6db691ed2c 100644
+index a129655ce3..3128abd6ff 100644
 --- a/fs/iso9660/iso9660.mk
 +++ b/fs/iso9660/iso9660.mk
-@@ -129,6 +129,7 @@ ROOTFS_ISO9660_PRE_GEN_HOOKS += ROOTFS_ISO9660_DISABLE_EXTERNAL_INITRD
+@@ -129,7 +129,8 @@ ROOTFS_ISO9660_PRE_GEN_HOOKS += ROOTFS_ISO9660_DISABLE_EXTERNAL_INITRD
  endif # ROOTFS_ISO9660_USE_INITRD
  
  define ROOTFS_ISO9660_CMD
+-	$(HOST_DIR)/bin/genisoimage -J -R -b $(ROOTFS_ISO9660_BOOT_IMAGE) \
 +LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1 \
- 	$(HOST_DIR)/bin/genisoimage -J -R -b $(ROOTFS_ISO9660_BOOT_IMAGE) \
++	$(HOST_DIR)/bin/genisoimage -J -r -b $(ROOTFS_ISO9660_BOOT_IMAGE) \
  		-no-emul-boot -boot-load-size 4 -boot-info-table \
  		$(ROOTFS_ISO9660_GENISOIMAGE_OPTS) \
+ 		-o $@ $(ROOTFS_ISO9660_TMP_TARGET_DIR)
