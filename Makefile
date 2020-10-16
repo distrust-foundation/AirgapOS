@@ -147,6 +147,9 @@ update-packages:
 	docker cp \
 		"$(NAME)-update-packages:/etc/apt/sources.list" \
 		"$(PWD)/config/container/sources.list"
+	docker cp \
+		"$(NAME)-update-packages:/etc/apt/package-hashes.txt" \
+		"$(PWD)/config/container/package-hashes.txt"
 	docker rm -f "$(NAME)-update-packages"
 
 ## Make Helpers

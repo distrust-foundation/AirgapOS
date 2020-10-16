@@ -15,8 +15,18 @@ deb http://deb.debian.org/debian buster-updates main
 deb http://snapshot.debian.org/archive/debian/${snapshot_date} buster-updates main
 EOF
 
-set -e;
+apt-get update
+apt install -y openssl
+apt-get install -y --download-only $(cat /etc/apt/packages.list)
 
-apt-install
+(
+	cd /var/cache/apt/archives \
+		&& find . -type f \( -iname \*.deb \) -exec openssl sha256 -r {} \; \
+		| sed 's/ \*.\// /g' \
+		| LC_ALL=C sort
+) > /etc/apt/package-hashes.txt
 
-dpkg -l | awk '{ if ($1 == "ii") print $2 "=" $3 }' > /etc/apt/packages.list
+cat /etc/apt/package-hashes.txt \
+	| awk '{ print $2 }' \
+	| sed -e 's/_[a-z0-9]\+\.deb//g' -e 's/_/=/g' \
+	> /etc/apt/packages.list
