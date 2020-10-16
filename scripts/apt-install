@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 set -e;
 
+# Get latest apt-transport-https and ca-certificates for safer https apt
 apt-get update
-until apt-get install --download-only -y $(cat /etc/apt/packages.list); do
+apt-get install -y apt-transport-https ca-certificates
+
+mv /etc/apt/sources.list{.new,}
+mv /etc/apt/packages.list{.new,}
+apt-get update
+until apt-get install --download-only --reinstall -y $(cat /etc/apt/packages.list); do
     echo "apt install failed. Likely throttled. Retrying in 10 mins...";
     sleep 600;
 done;
@@ -18,4 +24,4 @@ diff /etc/apt/package-hashes{,-compare}.txt
 
 apt-get install -y $(cat /etc/apt/packages.list)
 
-rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*;
+rm -rf /var/ache/apt/archives/* /var/lib/apt/lists/* /tmp/* /var/tmp/*;

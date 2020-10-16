@@ -10,9 +10,9 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 ADD scripts/ /usr/local/bin/
 
-## Install packages from packages.list with retry
-ADD config/container/sources.list /etc/apt/sources.list
-ADD config/container/packages.list /etc/apt/packages.list
+## Download, verify, and install packages against stored lists/hashes via https
+ADD config/container/sources.list /etc/apt/sources.list.new
+ADD config/container/packages.list /etc/apt/packages.list.new
 ADD config/container/package-hashes.txt /etc/apt/package-hashes.txt
 ADD config/container/apt.conf /etc/apt/apt.conf
 RUN apt-install
