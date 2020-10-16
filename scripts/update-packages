@@ -16,17 +16,18 @@ deb http://snapshot.debian.org/archive/debian/${snapshot_date} buster-updates ma
 EOF
 
 apt-get update
-apt install -y openssl
 apt-get install -y --download-only $(cat /etc/apt/packages.list)
 
 (
 	cd /var/cache/apt/archives \
-		&& find . -type f \( -iname \*.deb \) -exec openssl sha256 -r {} \; \
-		| sed 's/ \*.\// /g' \
+		&& find . -type f \( -iname \*.deb \) -exec sha256sum {} \; \
+		| sed 's/.\///g' \
 		| LC_ALL=C sort
 ) > /etc/apt/package-hashes.txt
 
-cat /etc/apt/package-hashes.txt \
-	| awk '{ print $2 }' \
-	| sed -e 's/_[a-z0-9]\+\.deb//g' -e 's/_/=/g' \
-	> /etc/apt/packages.list
+cp /dev/null /etc/apt/packages.list
+for deb in /var/cache/apt/archives/*.deb; do
+	package=$(dpkg-deb -f $deb Package);
+	version=$(dpkg --info ${deb} | grep "^ Version: " | sed 's/^ Version: //g');
+	echo "${package}=${version}" >> /etc/apt/packages.list;
+done
