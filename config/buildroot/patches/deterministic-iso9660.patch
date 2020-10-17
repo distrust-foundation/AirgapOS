@@ -1,16 +1,30 @@
 diff --git a/fs/iso9660/iso9660.mk b/fs/iso9660/iso9660.mk
-index a129655ce3..7cda68f7fb 100644
+index a129655ce3..068d332876 100644
 --- a/fs/iso9660/iso9660.mk
 +++ b/fs/iso9660/iso9660.mk
-@@ -129,8 +129,9 @@ ROOTFS_ISO9660_PRE_GEN_HOOKS += ROOTFS_ISO9660_DISABLE_EXTERNAL_INITRD
+@@ -24,7 +24,7 @@
+ 
+ ROOTFS_ISO9660_BOOT_MENU = $(call qstrip,$(BR2_TARGET_ROOTFS_ISO9660_BOOT_MENU))
+ 
+-ROOTFS_ISO9660_DEPENDENCIES = host-cdrkit linux
++ROOTFS_ISO9660_DEPENDENCIES = host-xorriso host-cdrkit linux
+ 
+ ifeq ($(BR2_TARGET_ROOTFS_INITRAMFS),y)
+ ROOTFS_ISO9660_USE_INITRD = YES
+@@ -129,8 +129,14 @@ ROOTFS_ISO9660_PRE_GEN_HOOKS += ROOTFS_ISO9660_DISABLE_EXTERNAL_INITRD
  endif # ROOTFS_ISO9660_USE_INITRD
  
  define ROOTFS_ISO9660_CMD
 -	$(HOST_DIR)/bin/genisoimage -J -R -b $(ROOTFS_ISO9660_BOOT_IMAGE) \
 -		-no-emul-boot -boot-load-size 4 -boot-info-table \
-+LD_PRELOAD=/usr/lib/x86_64-linux-gnu/faketime/libfaketime.so.1 \
-+	$(HOST_DIR)/bin/genisoimage -J -r -b $(ROOTFS_ISO9660_BOOT_IMAGE) \
-+		-no-cache-inodes -no-emul-boot -boot-load-size 4 -boot-info-table \
++	$(HOST_DIR)/bin/xorriso \
++		-as mkisofs \
++		-rock \
++		-joliet \
++		-eltorito-boot $(ROOTFS_ISO9660_BOOT_IMAGE) \
++		-no-emul-boot \
++		-boot-load-size 4 \
++		-boot-info-table \
  		$(ROOTFS_ISO9660_GENISOIMAGE_OPTS) \
  		-o $@ $(ROOTFS_ISO9660_TMP_TARGET_DIR)
  endef
