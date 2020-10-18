@@ -1,5 +1,5 @@
 diff --git a/fs/iso9660/iso9660.mk b/fs/iso9660/iso9660.mk
-index a129655ce3..068d332876 100644
+index a129655ce3..1adaf15923 100644
 --- a/fs/iso9660/iso9660.mk
 +++ b/fs/iso9660/iso9660.mk
 @@ -24,7 +24,7 @@
@@ -11,7 +11,7 @@ index a129655ce3..068d332876 100644
  
  ifeq ($(BR2_TARGET_ROOTFS_INITRAMFS),y)
  ROOTFS_ISO9660_USE_INITRD = YES
-@@ -129,8 +129,14 @@ ROOTFS_ISO9660_PRE_GEN_HOOKS += ROOTFS_ISO9660_DISABLE_EXTERNAL_INITRD
+@@ -129,10 +129,20 @@ ROOTFS_ISO9660_PRE_GEN_HOOKS += ROOTFS_ISO9660_DISABLE_EXTERNAL_INITRD
  endif # ROOTFS_ISO9660_USE_INITRD
  
  define ROOTFS_ISO9660_CMD
@@ -19,12 +19,19 @@ index a129655ce3..068d332876 100644
 -		-no-emul-boot -boot-load-size 4 -boot-info-table \
 +	$(HOST_DIR)/bin/xorriso \
 +		-as mkisofs \
-+		-rock \
++		-R \
 +		-joliet \
 +		-eltorito-boot $(ROOTFS_ISO9660_BOOT_IMAGE) \
 +		-no-emul-boot \
 +		-boot-load-size 4 \
 +		-boot-info-table \
  		$(ROOTFS_ISO9660_GENISOIMAGE_OPTS) \
- 		-o $@ $(ROOTFS_ISO9660_TMP_TARGET_DIR)
+-		-o $@ $(ROOTFS_ISO9660_TMP_TARGET_DIR)
++		-o $@ $(ROOTFS_ISO9660_TMP_TARGET_DIR) \
++		-- \
++		-uid 0 \
++		-gid 0 \
++		-volume_date all_file_dates "=$(SOURCE_DATE_EPOCH)"
  endef
+ 
+ ifeq ($(BR2_TARGET_ROOTFS_ISO9660_HYBRID),y)
