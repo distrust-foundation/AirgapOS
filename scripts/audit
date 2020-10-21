@@ -49,11 +49,6 @@ target_os_source_cves=$( \
 )
 echo "done"
 
-printf "Generating NIST CPE definitions... "
-( cd ${buildroot_dir} && make cpe-info > /dev/null 2>&1 )
-cp ${buildroot_dir}/output/cpe-manifest.csv ${audit_dir}/cpe-manifest.csv
-echo "done"
-
 printf "Generating license usage reports... "
 ( cd ${buildroot_dir} && make legal-info > /dev/null 2>&1 )
 cp -R ${buildroot_dir}/output/legal-info ${audit_dir}/legal-info
@@ -64,7 +59,6 @@ echo "Wrote: build/audit/os_src_hashes.txt"
 echo "Wrote: build/audit/fw_src_hashes.txt"
 echo "Wrote: build/audit/all_hashes.txt"
 echo "Wrote: build/audit/pkg-stats.json"
-echo "Wrote: build/audit/cpe-manifest.cve"
 echo "Wrote: build/audit/legal-info"
 echo "------------------------------------------------"
 echo "Build container package CVEs: ${container_package_cves}"
