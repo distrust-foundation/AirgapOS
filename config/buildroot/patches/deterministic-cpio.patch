@@ -1,16 +1,24 @@
 diff --git a/fs/cpio/cpio.mk b/fs/cpio/cpio.mk
-index 28a435dd5e..81f8c393d1 100644
+index 28a435dd5e..72923ded47 100644
 --- a/fs/cpio/cpio.mk
 +++ b/fs/cpio/cpio.mk
-@@ -37,7 +37,11 @@ ROOTFS_CPIO_OPTS += --reproducible
+@@ -32,12 +32,17 @@ ROOTFS_CPIO_PRE_GEN_HOOKS += ROOTFS_CPIO_ADD_INIT
+ # --reproducible option was introduced in cpio v2.12, which may not be
+ # available in some old distributions, so we build host-cpio
+ ifeq ($(BR2_REPRODUCIBLE),y)
+-ROOTFS_CPIO_DEPENDENCIES += host-cpio
+-ROOTFS_CPIO_OPTS += --reproducible
++ROOTFS_CPIO_DEPENDENCIES += host-cpio host-libarchive
  endif
  
  define ROOTFS_CPIO_CMD
 -	cd $(TARGET_DIR) && find . | cpio $(ROOTFS_CPIO_OPTS) --quiet -o -H newc > $@
-+	cd $(TARGET_DIR) && \
-+	find . \
-+	| LC_ALL=C sort \
-+	| cpio $(ROOTFS_CPIO_OPTS) --quiet -o -H newc \
++	cd $(TARGET_DIR) \
++	&& find . -mindepth 1 -execdir touch -hcd "@0" "{}" + \
++	&& find . -mindepth 1 -printf '%P\0' \
++	| sort -z \
++	| LANG=C bsdtar --null -cnf - -T - \
++	| LANG=C bsdtar --uid 0 --gid 0 --null -cf - --format=newc @- \
 +	> $@
  endef
  
