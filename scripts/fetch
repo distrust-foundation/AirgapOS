@@ -26,6 +26,11 @@ mkdir -p "$build_dir"
 	cd $buildroot_dir;
 	git checkout "$buildroot_ref";
 	git reset --hard;
+	git tag airgap || :
+	current_ref="$(git rev-parse --verify HEAD)"
+	[ "$current_ref" == "$buildroot_ref" ] || {
+		echo "Error: $buildroot_ref was not successfully checked out"; exit 1;
+	}
 	if [ "$(ls -A "${buildroot_external}/patches")" ]; then
 		for patch in "${buildroot_external}"/patches/*; do
 			echo "Applying patch: ${patch}";
@@ -42,6 +47,11 @@ mkdir -p "$build_dir"
 	cd "$heads_dir";
 	git checkout "$heads_ref";
 	git reset --hard;
+	git tag airgap || :
+	current_ref="$(git rev-parse --verify HEAD)"
+	[ "$current_ref" == "$heads_ref" ] || {
+		echo "Error: $heads_ref was not successfully checked out"; exit 1;
+	}
 	if [ "$(ls -A "${heads_external}/patches")" ]; then
 		for patch in "${heads_external}"/patches/*; do
 			echo "Applying patch: ${patch}";

@@ -1,8 +1,8 @@
 diff --git a/fs/cpio/cpio.mk b/fs/cpio/cpio.mk
-index 28a435dd5e..72923ded47 100644
+index 81f8c393d1..72923ded47 100644
 --- a/fs/cpio/cpio.mk
 +++ b/fs/cpio/cpio.mk
-@@ -32,12 +32,17 @@ ROOTFS_CPIO_PRE_GEN_HOOKS += ROOTFS_CPIO_ADD_INIT
+@@ -32,15 +32,16 @@ ROOTFS_CPIO_PRE_GEN_HOOKS += ROOTFS_CPIO_ADD_INIT
  # --reproducible option was introduced in cpio v2.12, which may not be
  # available in some old distributions, so we build host-cpio
  ifeq ($(BR2_REPRODUCIBLE),y)
@@ -12,14 +12,28 @@ index 28a435dd5e..72923ded47 100644
  endif
  
  define ROOTFS_CPIO_CMD
--	cd $(TARGET_DIR) && find . | cpio $(ROOTFS_CPIO_OPTS) --quiet -o -H newc > $@
+-	cd $(TARGET_DIR) && \
+-	find . \
+-	| LC_ALL=C sort \
+-	| cpio $(ROOTFS_CPIO_OPTS) --quiet -o -H newc \
 +	cd $(TARGET_DIR) \
 +	&& find . -mindepth 1 -execdir touch -hcd "@0" "{}" + \
 +	&& find . -mindepth 1 -printf '%P\0' \
 +	| sort -z \
 +	| LANG=C bsdtar --null -cnf - -T - \
 +	| LANG=C bsdtar --uid 0 --gid 0 --null -cf - --format=newc @- \
-+	> $@
+ 	> $@
  endef
  
- ifeq ($(BR2_TARGET_ROOTFS_CPIO_UIMAGE),y)
+diff --git a/package/libarchive/libarchive.mk b/package/libarchive/libarchive.mk
+index 708ce637c2..2ba8dcab2a 100644
+--- a/package/libarchive/libarchive.mk
++++ b/package/libarchive/libarchive.mk
+@@ -135,7 +135,6 @@ endif
+ # The only user of host-libarchive needs zlib support
+ HOST_LIBARCHIVE_DEPENDENCIES = host-zlib
+ HOST_LIBARCHIVE_CONF_OPTS = \
+-	--disable-bsdtar \
+ 	--disable-bsdcpio \
+ 	--disable-bsdcat \
+ 	--disable-acl \

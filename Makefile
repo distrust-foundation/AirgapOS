@@ -1,7 +1,7 @@
 NAME := airgap
 IMAGE := local/$(NAME):latest
 TARGET := x86_64
-DEVICES := librem13v4 librem15v4
+DEVICES := librem_13v4 librem_15v4
 GIT_REF := $(shell git log -1 --format=%H config)
 GIT_AUTHOR := $(shell git log -1 --format=%an config)
 GIT_KEY := $(shell git log -1 --format=%GP config)
@@ -63,7 +63,7 @@ build-fw:
 	mkdir -p $(RELEASE_DIR)
 	for device in $(DEVICES); do \
 		cp \
-			build/heads/build/$${device}/coreboot.rom \
+			build/heads/build/$${device}/PureBoot*.rom \
 			$(RELEASE_DIR)/$${device}.rom ; \
 	done
 
@@ -111,7 +111,7 @@ sign: $(RELEASE_DIR)/*.rom $(RELEASE_DIR)/*.iso
 .PHONY: shell
 shell:
 	$(docker) inspect "$(NAME)" \
-	&& $(docker) exec --interactive --tty "$(NAME)" shell \
+	&& $(docker) exec --interactive --user=root --tty "$(NAME)" shell \
 	|| $(contain) shell
 
 
@@ -119,7 +119,7 @@ shell:
 menuconfig:
 	$(contain) menuconfig
 
-.PHONY: menuconfig
+.PHONY: linux-menuconfig
 linux-menuconfig:
 	$(contain) linux-menuconfig
 
@@ -147,6 +147,9 @@ update-packages:
 	docker cp \
 		"$(NAME)-update-packages:/etc/apt/sources.list" \
 		"$(PWD)/config/container/sources.list"
+	docker cp \
+		"$(NAME)-update-packages:/etc/apt/package-hashes.txt" \
+		"$(PWD)/config/container/package-hashes.txt"
 	docker rm -f "$(NAME)-update-packages"
 
 ## Make Helpers
@@ -163,7 +166,6 @@ contain := \
 		--interactive \
 		--name "$(NAME)" \
 		--hostname "$(NAME)" \
-		--user $(userid):$(groupid) \
 		--env TARGET="$(TARGET)" \
 		--env DEVICES="$(DEVICES)" \
 		--env GIT_DATETIME="$(GIT_DATETIME)" \
@@ -172,7 +174,8 @@ contain := \
 		--env GIT_AUTHOR="$(GIT_AUTHOR)" \
 		--env GIT_KEY="$(GIT_KEY)" \
 		--env GIT_STATE="$(GIT_STATE)" \
-		--security-opt seccomp=unconfined \
+		--env UID="$(shell id -u)" \
+		--env GID="$(shell id -g)" \
 		--volume $(PWD)/build:/home/build/build \
 		--volume $(PWD)/config:/home/build/config \
 		--volume $(PWD)/release:/home/build/release \

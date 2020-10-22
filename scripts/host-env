@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+
+uid=${UID?}
+gid=${GID?}
+user=${USER:-"build"}
+export HOME="/home/${user}"
+
+groupadd -g "$gid" "${user}"
+useradd \
+	-g "$gid" \
+	-u "$uid" \
+	-md "/home/${user}" \
+	-s /bin/bash \
+	"${user}"
+
+mkdir -p "$HOME"
+chown -R "$uid:$gid" "$HOME"
+cd "$HOME"
+setpriv --reuid="$uid" --regid="$gid" --init-groups "$@"
