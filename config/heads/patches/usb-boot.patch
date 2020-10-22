@@ -1,5 +1,5 @@
 diff --git a/initrd/bin/gui-init b/initrd/bin/gui-init
-index a7f97ab..f1562a9 100755
+index 38953ca..1740da6 100755
 --- a/initrd/bin/gui-init
 +++ b/initrd/bin/gui-init
 @@ -13,6 +13,11 @@ mount_boot()
@@ -7,15 +7,15 @@ index a7f97ab..f1562a9 100755
    # Mount local disk if it is not already mounted
    while ! grep -q /boot /proc/mounts ; do
 +
-+	if [ "$CONFIG_BOOT_USB" = "y" ]; then
-+	    enable_usb
-+	fi
++    if [ "$CONFIG_BOOT_USB" = "y" ]; then
++        enable_usb
++    fi
 +
-     # ensure default boot device is set
-     if [ ! -e "$CONFIG_BOOT_DEV" ]; then
-       if (whiptail $CONFIG_ERROR_BG_COLOR --clear --title "ERROR: $CONFIG_BOOT_DEV missing!" \
+     # try to mount if CONFIG_BOOT_DEV exists
+     if [ -e "$CONFIG_BOOT_DEV" ]; then
+       mount -o ro $CONFIG_BOOT_DEV /boot 
 diff --git a/initrd/bin/mount-usb b/initrd/bin/mount-usb
-index 266f9dd..556d66e 100755
+index 501171a..2196bbd 100755
 --- a/initrd/bin/mount-usb
 +++ b/initrd/bin/mount-usb
 @@ -4,19 +4,6 @@
@@ -39,11 +39,11 @@ index 266f9dd..556d66e 100755
    mkdir /media
  fi
 diff --git a/initrd/bin/usb-scan b/initrd/bin/usb-scan
-index a9debdf..6f10a30 100755
+index d9f26b0..330d672 100755
 --- a/initrd/bin/usb-scan
 +++ b/initrd/bin/usb-scan
-@@ -4,12 +4,6 @@ set -e -o pipefail
- . /etc/functions
+@@ -5,12 +5,6 @@ set -e -o pipefail
+ . /etc/gui_functions
  . /tmp/config
  
 -# Unmount any previous boot device
@@ -53,13 +53,13 @@ index a9debdf..6f10a30 100755
 -fi
 -
  # Mount the USB boot device
- if ! grep -q /media /proc/mounts ; then
- 	mount-usb "$CONFIG_USB_BOOT_DEV" \
+ mount_usb || die "Unable to mount /media"
+ 
 diff --git a/initrd/etc/functions b/initrd/etc/functions
-index 0c7e950..d8f4e33 100755
+index dc0fbed..00afcdb 100755
 --- a/initrd/etc/functions
 +++ b/initrd/etc/functions
-@@ -116,6 +116,18 @@ enable_usb()
+@@ -122,6 +122,18 @@ enable_usb()
  		|| die "xhci_pci: module load failed"
  		sleep 2
  	fi

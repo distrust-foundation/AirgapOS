@@ -1,7 +1,7 @@
 NAME := airgap
 IMAGE := local/$(NAME):latest
 TARGET := x86_64
-DEVICES := librem13v4 librem15v4
+DEVICES := librem_13v4 librem_15v4
 GIT_REF := $(shell git log -1 --format=%H config)
 GIT_AUTHOR := $(shell git log -1 --format=%an config)
 GIT_KEY := $(shell git log -1 --format=%GP config)
