@@ -63,7 +63,7 @@ build-fw:
 	mkdir -p $(RELEASE_DIR)
 	for device in $(DEVICES); do \
 		cp \
-			build/heads/build/$${device}/PureBoot*.rom \
+			build/heads/build/$${device}/pureboot*.rom \
 			$(RELEASE_DIR)/$${device}.rom ; \
 	done
 
