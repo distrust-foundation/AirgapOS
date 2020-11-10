@@ -1,21 +1,79 @@
 diff --git a/initrd/bin/gui-init b/initrd/bin/gui-init
-index 38953ca..1740da6 100755
+index 1369ed1..f576a8e 100755
 --- a/initrd/bin/gui-init
 +++ b/initrd/bin/gui-init
-@@ -13,6 +13,11 @@ mount_boot()
-   
+@@ -13,21 +13,26 @@ first_pass=true
+ 
+ mount_boot()
+ {
+-  
++
    # Mount local disk if it is not already mounted
    while ! grep -q /boot /proc/mounts ; do
 +
-+    if [ "$CONFIG_BOOT_USB" = "y" ]; then
-+        enable_usb
-+    fi
-+
      # try to mount if CONFIG_BOOT_DEV exists
      if [ -e "$CONFIG_BOOT_DEV" ]; then
-       mount -o ro $CONFIG_BOOT_DEV /boot 
+-      mount -o ro $CONFIG_BOOT_DEV /boot 
++      mount -o ro $CONFIG_BOOT_DEV /boot
+       [[ $? -eq 0 ]] && continue
+     fi
+ 
+-    # CONFIG_BOOT_DEV doesn't exist or couldn't be mounted, so give user options
++    # try to mount usb to /media and /boot if it exists
++    mount-usb \
++    && mount -o bind,ro /media /boot \
++    && continue
++
++    # no boot device available, so give user options
+     whiptail $BG_COLOR_ERROR --clear --title "ERROR: No Bootable OS Found!" \
+-        --menu "    No bootable OS was found on the default boot device $CONFIG_BOOT_DEV.
++        --menu "    No bootable OS was found at $CONFIG_BOOT_DEV or on USB.
+     How would you like to proceed?" 30 90 4 \
+         'b' ' Select a new boot device' \
+-        'u' ' Boot from USB' \
+         'm' ' Continue to the main menu' \
+         'x' ' Exit to recovery shell' \
+         2>/tmp/whiptail || recovery "GUI menu failed"
+@@ -41,9 +46,6 @@ mount_boot()
+           . /tmp/config
+         fi
+         ;;
+-      u )
+-        exec /bin/usb-init
+-        ;;
+       m )
+         break
+         ;;
+@@ -55,6 +57,11 @@ mount_boot()
+ }
+ verify_global_hashes()
+ {
++
++  # If default boot device is not mounted, then there are no hashes to verify
++  # User is likely usb booting.
++  df $CONFIG_BOOT_DEV >/dev/null 2>&1 || return 0
++
+   # Check the hashes of all the files, ignoring signatures for now
+   check_config /boot force
+   TMP_HASH_FILE="/tmp/kexec/kexec_hashes.txt"
+@@ -458,6 +465,7 @@ while true; do
+   if [ "$totp_confirm" = "y" -o -n "$totp_confirm" ]; then
+     # Try to boot the default
+     mount_boot
++
+     verify_global_hashes
+     if [ $? -ne 0 ]; then
+       continue
+@@ -467,6 +475,7 @@ while true; do
+       kexec-select-boot -b /boot -c "grub.cfg" -g \
+       || recovery "Failed default boot"
+     else
++      usb-init
+       if (whiptail --title 'No Default Boot Option Configured' \
+           --yesno "There is no default boot option configured yet.\nWould you like to load a menu of boot options?\nOtherwise you will return to the main menu." 16 90) then
+         kexec-select-boot -m -b /boot -c "grub.cfg" -g
 diff --git a/initrd/bin/mount-usb b/initrd/bin/mount-usb
-index 501171a..2196bbd 100755
+index a79dd66..8a8734c 100755
 --- a/initrd/bin/mount-usb
 +++ b/initrd/bin/mount-usb
 @@ -4,19 +4,6 @@
@@ -39,7 +97,7 @@ index 501171a..2196bbd 100755
    mkdir /media
  fi
 diff --git a/initrd/bin/usb-scan b/initrd/bin/usb-scan
-index d9f26b0..330d672 100755
+index d9f26b0..b64f150 100755
 --- a/initrd/bin/usb-scan
 +++ b/initrd/bin/usb-scan
 @@ -5,12 +5,6 @@ set -e -o pipefail
@@ -55,8 +113,30 @@ index d9f26b0..330d672 100755
  # Mount the USB boot device
  mount_usb || die "Unable to mount /media"
  
+@@ -29,12 +23,16 @@ get_menu_option() {
+ 			MENU_OPTIONS="$MENU_OPTIONS $n ${option}"
+ 		done < /tmp/iso_menu.txt
+ 
+-		whiptail --clear --title "Select your ISO boot option" \
+-			--menu "Choose the ISO boot option [1-$n, s for standard boot, a to abort]:" 20 120 8 \
+-			-- $MENU_OPTIONS \
+-			2>/tmp/whiptail || die "Aborting boot attempt"
++		if [ "$n" -eq "1" ]; then
++			option_index=1
++		else
++			whiptail --clear --title "Select your ISO boot option" \
++				--menu "Choose the ISO boot option [1-$n, s for standard boot, a to abort]:" 20 120 8 \
++				-- $MENU_OPTIONS \
++				2>/tmp/whiptail || die "Aborting boot attempt"
+ 
+-		option_index=$(cat /tmp/whiptail)
++			option_index=$(cat /tmp/whiptail)
++		fi
+ 	else
+ 		echo "+++ Select your ISO boot option:"
+ 		n=0
 diff --git a/initrd/etc/functions b/initrd/etc/functions
-index dc0fbed..00afcdb 100755
+index dc0fbed..a083e17 100755
 --- a/initrd/etc/functions
 +++ b/initrd/etc/functions
 @@ -122,6 +122,18 @@ enable_usb()
@@ -69,7 +149,7 @@ index dc0fbed..00afcdb 100755
 +	  echo "Scanning for USB storage devices..."
 +	  insmod /lib/modules/usb-storage.ko >/dev/null 2>&1 \
 +	  || die "usb_storage: module load failed"
-+	  while [[ $count == $(ls /dev/sd* 2>/dev/null | wc -l) ]]; do 
++	  while [[ $count == $(ls /dev/sd* 2>/dev/null | wc -l) ]]; do
 +	    [[ $timeout -ge 4 ]] && break
 +	    sleep 1
 +	    timeout=$(($timeout+1))

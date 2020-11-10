@@ -58,7 +58,8 @@ mkdir -p "$build_dir"
 			patch -p1 --no-backup-if-mismatch < "${patch}";
 		done;
 	fi
-	rsync -Pav "${heads_external}/boards/" "${heads_dir}/boards/"
+	[ -d "${heads_external}/boards" ] && \
+		rsync -Pav "${heads_external}/boards/" "${heads_dir}/boards/"
 	[[ "$devices" =~ "librem" ]] \
 		&& (cd "$heads_dir/blobs/librem_kbl" && ./get_blobs.sh)
 )
