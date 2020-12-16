@@ -1,3 +1,0 @@
-0abd1d50d9b69f5a0692aff9fb0d2aff103eb6ec2b33d9dadecb044e56740d45 *release/1.0.0rc9/librem13v4.rom
-1fa4f1bdf515dc890cd728015228a606f7c5ffd9b467254f4d3ac596f20188ec *release/1.0.0rc9/librem15v4.rom
-c0261654eb8b3af453ed7b8df7ac06e3bf45c66e62a45d5a47d964dae69ba37f *release/1.0.0rc9/airgap_x86_64.iso
