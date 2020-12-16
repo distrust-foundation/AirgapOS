@@ -5,9 +5,8 @@ DEVICES := librem_13v4 librem_15v4
 GIT_REF := $(shell git log -1 --format=%H config)
 GIT_AUTHOR := $(shell git log -1 --format=%an config)
 GIT_KEY := $(shell git log -1 --format=%GP config)
-GIT_EPOCH := $(shell git log -1 --format=%at config)
-GIT_DATETIME := \
-	$(shell git log -1 --format=%cd --date=format:'%Y-%m-%d %H:%M:%S' config)
+GIT_EPOCH := 0
+GIT_DATETIME := "1970-01-01 00:00:00"
 VERSION := "develop"
 RELEASE_DIR := release/$(VERSION)
 ifeq ($(strip $(shell git status --porcelain 2>/dev/null)),)
