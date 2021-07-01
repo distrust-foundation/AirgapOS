@@ -8,7 +8,7 @@ apt-get install -y apt-transport-https ca-certificates
 mv /etc/apt/sources.list{.new,}
 mv /etc/apt/packages.list{.new,}
 apt-get update
-until apt-get install --download-only --reinstall -y $(cat /etc/apt/packages.list); do
+until apt-get install --download-only --reinstall --allow-downgrades -y $(cat /etc/apt/packages.list); do
     echo "apt install failed. Likely throttled. Retrying in 10 mins...";
     sleep 600;
 done;
@@ -22,6 +22,6 @@ done;
 
 diff /etc/apt/package-hashes{,-compare}.txt
 
-apt-get install -y $(cat /etc/apt/packages.list)
+apt-get install --allow-downgrades -y $(cat /etc/apt/packages.list)
 
 rm -rf /var/ache/apt/archives/* /var/lib/apt/lists/* /tmp/* /var/tmp/*;
