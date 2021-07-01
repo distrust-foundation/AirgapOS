@@ -1,6 +1,6 @@
 # AirgapOS #
 
-<https://gitlab.com/pchq/airgap>
+<https://github.com/distrust-foundation/airgap>
 
 ## About ##
 
