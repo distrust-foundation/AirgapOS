@@ -1,15 +1,12 @@
 #!/bin/bash
 
 target=${TARGET?}
-env_file=${HOME}/config/config.env
+env_file=/config/config.env
 
-[ -f $env_file ] && export $( cat ${env_file} | xargs )
+source ${env_file}
 
-export BUILD_DIR="${HOME}/build"
-export BR2_EXTERNAL="${HOME}/config/buildroot"
-export HEADS_EXTERNAL="${HOME}/config/heads"
+export HOME=/home/build
 export RELEASE_DIR="${HOME}/release"
-export BUILDROOT_REPO=git://git.busybox.net/buildroot
-export HEADS_REPO=https://source.puri.sm/coreboot/purism-heads.git
-export FAKETIME="@${GIT_DATETIME?}"
-export SOURCE_DATE_EPOCH="${GIT_EPOCH?}"
+
+mkdir -p ${HOME}
+chown -R "${UID}:${GID}" /home/build/

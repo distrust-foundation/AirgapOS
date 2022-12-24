@@ -4,8 +4,6 @@ set -e; source environment
 
 target=${TARGET?}
 
-cd /home/build/build/buildroot
+cd /home/build/buildroot
 make "airgap_${TARGET}_defconfig"
 make menuconfig
-cp /home/build/build/buildroot/.config \
-	"/home/build/config/buildroot/configs/airgap_${TARGET}_defconfig"
