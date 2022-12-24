@@ -29,12 +29,15 @@ executables = $(docker) git patch
 
 include $(PWD)/config/config.env
 
-.DEFAULT_GOAL := all
+## Use env vars from existing release if present
+ifneq (,$(wildcard $(RELEASE_DIR)/release.env))
+    include $(RELEASE_DIR)/release.env
+    export
+endif
+
+.DEFAULT_GOAL := out/manifest.txt
 
 ## Primary Targets
-
-.PHONY: build
-build: build-os build-fw
 
 .PHONY: fetch
 fetch: $(CACHE_DIR)/toolchain.tar
@@ -50,9 +53,6 @@ mrproper:
 	docker image rm -f $(IMAGE)
 	rm -rf $(CACHE_DIR)
 
-.PHONY: build-os
-build-os: $(CACHE_DIR)/toolchain.tar $(RELEASE_DIR)/airgap_$(ARCH).iso
-
 .PHONY: build-fw
 build-fw: $(CACHE_DIR)/toolchain.tar
 	$(call toolchain,$(USER),"build-fw")
@@ -65,41 +65,67 @@ build-fw: $(CACHE_DIR)/toolchain.tar
 
 ## Release Targets
 
+.PHONY: release
+release: \
+	$(RELEASE_DIR)/airgap.iso \
+	$(RELEASE_DIR)/release.env \
+	$(RELEASE_DIR)/manifest.txt
+
 .PHONY: audit
 audit: $(CACHE_DIR)/toolchain.tar
 	mkdir -p $(CACHE_DIR)/audit
 	$(call toolchain,$(USER),"audit")
 
-.PHONY: hash
-hash:
-	if [ ! -f release/$(VERSION)/hashes.txt ]; then \
-		openssl sha256 -r release/$(VERSION)/*.rom \
-			> release/$(VERSION)/hashes.txt; \
-		openssl sha256 -r release/$(VERSION)/*.iso \
-			>> release/$(VERSION)/hashes.txt; \
-	fi
+.PHONY: attest
+attest: \
+	$(RELEASE_DIR)/airgap.iso \
+	$(RELEASE_DIR)/release.env \
+	$(RELEASE_DIR)/manifest.txt
 
-.PHONY: verify
-verify:
-	mkdir -p $(CACHE_DIR)/audit/$(VERSION)
-	openssl sha256 -r $(RELEASE_DIR)/*.rom \
-		> $(CACHE_DIR)/audit/$(VERSION)/release_hashes.txt
-	openssl sha256 -r $(RELEASE_DIR)/*.iso \
-		>> $(CACHE_DIR)/audit/$(VERSION)/release_hashes.txt
-	diff -q $(CACHE_DIR)/audit/$(VERSION)/release_hashes.txt $(RELEASE_DIR)/hashes.txt;
+	$(MAKE) mrproper out/manifest.txt
+	diff -q $(OUT_DIR)/manifest.txt $(RELEASE_DIR)/manifest.txt;
 
 .PHONY: sign
-sign: $(RELEASE_DIR)/*.rom $(RELEASE_DIR)/*.iso
+sign: $(RELEASE_DIR)/manifest.txt
 	set -e; \
-	for file in $^; do \
-		gpg --armor --detach-sig "$${file}"; \
-		fingerprint=$$(\
-			gpg --list-packets $${file}.asc \
-				| grep "issuer key ID" \
-				| sed 's/.*\([A-Z0-9]\{16\}\).*/\1/g' \
-		); \
-		mv $${file}.asc $${file}.$${fingerprint}.asc; \
-	done
+	git config --get user.signingkey 2>&1 >/dev/null || { \
+		echo "Error: git user.signingkey is not defined"; \
+		exit 1; \
+	}; \
+	fingerprint=$$(\
+		git config --get user.signingkey \
+		| sed 's/.*\([A-Z0-9]\{16\}\).*/\1/g' \
+	); \
+	gpg --armor \
+		--detach-sig  \
+		--output $(RELEASE_DIR)/manifest.$${fingerprint}.asc \
+		$(RELEASE_DIR)/manifest.txt
+
+.PHONY: verify
+verify: $(RELEASE_DIR)/manifest.txt
+	set -e; \
+	for file in $(RELEASE_DIR)/manifest.*.asc; do \
+		echo "\nVerifying: $${file}\n"; \
+		gpg --verify $${file} $(RELEASE_DIR)/manifest.txt; \
+	done;
+
+$(RELEASE_DIR):
+	mkdir -p $(RELEASE_DIR)
+
+$(RELEASE_DIR)/release.env: \
+	$(RELEASE_DIR) \
+	$(OUT_DIR)/release.env
+	cp out/release.env $(RELEASE_DIR)/release.env
+
+$(RELEASE_DIR)/airgap.iso: \
+	$(RELEASE_DIR) \
+	$(OUT_DIR)/airgap.iso
+	cp out/airgap.iso $(RELEASE_DIR)/airgap.iso
+
+$(RELEASE_DIR)/manifest.txt: \
+	$(RELEASE_DIR) \
+	$(OUT_DIR)/manifest.txt
+	cp out/manifest.txt $(RELEASE_DIR)/manifest.txt
 
 ## Development Targets
 
@@ -158,7 +184,19 @@ $(CACHE_DIR)/buildroot: $(CACHE_DIR)/toolchain.tar
 $(CACHE_DIR)/heads: $(CACHE_DIR)/toolchain.tar
 	$(call git_clone,heads,$(HEADS_REPO),$(HEADS_REF))
 
-$(OUT_DIR)/airgap.iso: $(CACHE_DIR)/buildroot
+$(OUT_DIR):
+	mkdir -p $(OUT_DIR)
+
+$(OUT_DIR)/release.env: $(OUT_DIR)
+	echo 'VERSION=$(VERSION)'            > $(OUT_DIR)/release.env
+	echo 'GIT_REF=$(GIT_REF)'           >> $(OUT_DIR)/release.env
+	echo 'GIT_AUTHOR=$(GIT_AUTHOR)'     >> $(OUT_DIR)/release.env
+	echo 'GIT_KEY=$(GIT_KEY)'           >> $(OUT_DIR)/release.env
+	echo 'GIT_DATETIME=$(GIT_DATETIME)' >> $(OUT_DIR)/release.env
+
+$(OUT_DIR)/airgap.iso: \
+	$(CACHE_DIR)/buildroot \
+	$(OUT_DIR)/release.env
 	$(call apply_patches,buildroot,$(BR2_EXTERNAL)/patches)
 	$(call toolchain,$(USER)," \
     	cd buildroot; \
@@ -170,6 +208,13 @@ $(OUT_DIR)/airgap.iso: $(CACHE_DIR)/buildroot
 	mkdir -p $(OUT_DIR)
 	cp $(CACHE_DIR)/buildroot/output/images/rootfs.iso9660 \
 		$(OUT_DIR)/airgap.iso
+
+$(OUT_DIR)/manifest.txt: \
+	$(OUT_DIR)/airgap.iso \
+	$(OUT_DIR)/release.env
+	cd $(OUT_DIR); \
+	openssl sha256 -r release.env > manifest.txt; \
+	openssl sha256 -r airgap.iso >> manifest.txt;
 
 ## Make Helpers
 
