@@ -1,6 +1,4 @@
 build/
 out/
 release/develop
-release/*/*.iso
-release/*/*.rom
 .*
