@@ -51,7 +51,7 @@ clean: $(CACHE_DIR)/toolchain.tar
 .PHONY: mrproper
 mrproper:
 	docker image rm -f $(IMAGE)
-	rm -rf $(CACHE_DIR)
+	rm -rf $(CACHE_DIR) $(OUT_DIR)
 
 .PHONY: build-fw
 build-fw: $(CACHE_DIR)/toolchain.tar
