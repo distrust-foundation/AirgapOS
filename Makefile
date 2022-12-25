@@ -66,24 +66,16 @@ build-fw: $(CACHE_DIR)/toolchain.tar
 ## Release Targets
 
 .PHONY: release
-release: \
-	$(RELEASE_DIR)/airgap.iso \
-	$(RELEASE_DIR)/release.env \
-	$(RELEASE_DIR)/manifest.txt
-
-.PHONY: audit
-audit: $(CACHE_DIR)/toolchain.tar
-	mkdir -p $(CACHE_DIR)/audit
-	$(call toolchain,$(USER),"audit")
+release: | out/release.env out/airgap.iso out/manifest.txt
+	mkdir -p $(RELEASE_DIR)
+	cp out/release.env release/$(RELEASE_DIR)/release.env
+	cp out/airgap.iso release/$(RELEASE_DIR)/airgap.iso
+	cp out/manifest.txt release/$(RELEASE_DIR)/manifest.txt
 
 .PHONY: attest
-attest: \
-	$(RELEASE_DIR)/airgap.iso \
-	$(RELEASE_DIR)/release.env \
-	$(RELEASE_DIR)/manifest.txt
-
+attest:
 	$(MAKE) mrproper out/manifest.txt
-	diff -q $(OUT_DIR)/manifest.txt $(RELEASE_DIR)/manifest.txt;
+	diff -q out/manifest.txt release/$(VERSION)/manifest.txt;
 
 .PHONY: sign
 sign: $(RELEASE_DIR)/manifest.txt
@@ -109,23 +101,28 @@ verify: $(RELEASE_DIR)/manifest.txt
 		gpg --verify $${file} $(RELEASE_DIR)/manifest.txt; \
 	done;
 
+.PHONY: audit
+audit: $(CACHE_DIR)/toolchain.tar
+	mkdir -p $(CACHE_DIR)/audit
+	$(call toolchain,$(USER),"audit")
+
 $(RELEASE_DIR):
 	mkdir -p $(RELEASE_DIR)
 
 $(RELEASE_DIR)/release.env: \
 	$(RELEASE_DIR) \
 	$(OUT_DIR)/release.env
-	cp out/release.env $(RELEASE_DIR)/release.env
+	cp $(OUT_DIR)/release.env $(RELEASE_DIR)/release.env
 
 $(RELEASE_DIR)/airgap.iso: \
 	$(RELEASE_DIR) \
 	$(OUT_DIR)/airgap.iso
-	cp out/airgap.iso $(RELEASE_DIR)/airgap.iso
+	cp $(OUT_DIR)/airgap.iso $(RELEASE_DIR)/airgap.iso
 
 $(RELEASE_DIR)/manifest.txt: \
 	$(RELEASE_DIR) \
 	$(OUT_DIR)/manifest.txt
-	cp out/manifest.txt $(RELEASE_DIR)/manifest.txt
+	cp $(OUT_DIR)/manifest.txt $(RELEASE_DIR)/manifest.txt
 
 ## Development Targets
 
