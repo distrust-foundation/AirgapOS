@@ -68,9 +68,9 @@ build-fw: $(CACHE_DIR)/toolchain.tar
 .PHONY: release
 release: | out/release.env out/airgap.iso out/manifest.txt
 	mkdir -p $(RELEASE_DIR)
-	cp out/release.env release/$(RELEASE_DIR)/release.env
-	cp out/airgap.iso release/$(RELEASE_DIR)/airgap.iso
-	cp out/manifest.txt release/$(RELEASE_DIR)/manifest.txt
+	cp out/release.env $(RELEASE_DIR)/release.env
+	cp out/airgap.iso $(RELEASE_DIR)/airgap.iso
+	cp out/manifest.txt $(RELEASE_DIR)/manifest.txt
 
 .PHONY: attest
 attest:
