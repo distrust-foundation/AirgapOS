@@ -74,11 +74,12 @@ release: | out/release.env out/airgap.iso out/manifest.txt
 
 .PHONY: attest
 attest:
-	$(MAKE) mrproper out/manifest.txt
-	diff -q out/manifest.txt release/$(VERSION)/manifest.txt;
+	rm -rf $(CACHE_DIR) $(OUT_DIR)
+	$(MAKE) $(OUT_DIR)/manifest.txt
+	diff -q $(OUT_DIR)/manifest.txt release/$(VERSION)/manifest.txt;
 
 .PHONY: sign
-sign: $(RELEASE_DIR)/manifest.txt
+sign:
 	set -e; \
 	git config --get user.signingkey 2>&1 >/dev/null || { \
 		echo "Error: git user.signingkey is not defined"; \
@@ -94,7 +95,7 @@ sign: $(RELEASE_DIR)/manifest.txt
 		$(RELEASE_DIR)/manifest.txt
 
 .PHONY: verify
-verify: $(RELEASE_DIR)/manifest.txt
+verify: | $(RELEASE_DIR)/manifest.txt
 	set -e; \
 	for file in $(RELEASE_DIR)/manifest.*.asc; do \
 		echo "\nVerifying: $${file}\n"; \

@@ -49,18 +49,23 @@ internet with high integrity on the supply chain of the firmware and OS used.
 
 ## Build ##
 
-1. Reproduce existing release, or build fresh if never released:
+### Build a new release
 
     ```
-    make VERSION=1.0.0rc1
+    make VERSION=1.0.0rc1 release
     ```
 
-2. Compares hashes of newly built iso/rom files with in-tree hashes.txt
+### Reproduce an existing release
 
     ```
-    make VERSION=1.0.0rc1 verify
+    make VERSION=1.0.0rc1 attest
     ```
 
+### Sign an existing release
+
+    ```
+    make VERSION=1.0.0rc1 sign
+    ```
 
 ## Install ##
 
@@ -81,24 +86,6 @@ internet with high integrity on the supply chain of the firmware and OS used.
 1. Insert remote attestation device
 2. Power on, and verify successful remote attestation
 3. Boot to airgap via: Options -> Boot Options -> USB Boot
-
-
-## Release ##
-
-1. Audit dependencies to ensure no relevant CVEs are open at the moment:
-
-    ```
-    make audit
-    ```
-
-2. Verify and add detached signature to given release with:
-
-    ```
-    make VERSION=1.0.0rc1 verify sign
-    ```
-
-3. Commit signatures.
-
 
 ## Development ##
 
