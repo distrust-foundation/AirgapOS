@@ -2,7 +2,6 @@ NAME := airgap
 IMAGE := local/$(NAME):latest
 ARCH := x86_64
 TARGET := $(ARCH)
-DEVICES := librem_13v4 librem_15v4
 USER := $(shell id -u):$(shell id -g)
 CPUS := $(shell docker run -it debian nproc)
 GIT_REF := $(shell git log -1 --format=%H config)
@@ -53,20 +52,13 @@ mrproper:
 	docker image rm -f $(IMAGE)
 	rm -rf $(CACHE_DIR) $(OUT_DIR)
 
-.PHONY: build-fw
-build-fw: $(CACHE_DIR)/toolchain.tar
-	$(call toolchain,$(USER),"build-fw")
-	mkdir -p $(RELEASE_DIR)
-	for device in $(DEVICES); do \
-		cp \
-			$(CACHE_DIR)/heads/build/$${device}/pureboot*.rom \
-			$(RELEASE_DIR)/$${device}.rom ; \
-	done
-
 ## Release Targets
 
 .PHONY: release
-release: | out/release.env out/airgap.iso out/manifest.txt
+release: | \
+	$(OUT_DIR)/release.env \
+	$(OUT_DIR)/airgap.iso \
+	$(OUT_DIR)/manifest.txt
 	mkdir -p $(RELEASE_DIR)
 	cp out/release.env $(RELEASE_DIR)/release.env
 	cp out/airgap.iso $(RELEASE_DIR)/airgap.iso
@@ -200,7 +192,7 @@ $(OUT_DIR)/airgap.iso: \
     	cd buildroot; \
     	make "airgap_$(TARGET)_defconfig"; \
 		unset FAKETIME; \
-    	make source; \
+		make source; \
 		make; \
 	")
 	mkdir -p $(OUT_DIR)
@@ -271,7 +263,6 @@ define toolchain
 		--env FAKETIME=$(FAKETIME) \
 		--env BR2_EXTERNAL="/$(BR2_EXTERNAL)" \
 		--env HEADS_EXTERNAL="/$(HEADS_EXTERNAL)" \
-		--env DEVICES="$(DEVICES)" \
 		--env UID="$(shell id -u)" \
 		--env GID="$(shell id -g)" \
 		$(IMAGE) \

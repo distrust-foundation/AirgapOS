@@ -4,7 +4,7 @@
 
 ## About ##
 
-A live buildroot based distribution designed for managing secrets offline.
+A live buildroot based Liux distribution designed for managing secrets offline.
 
 Built for those of us that want to be -really- sure our most important secrets
 are managed in a clean environment with an "air gap" between us and the
@@ -18,18 +18,10 @@ internet with high integrity on the supply chain of the firmware and OS used.
  * Store/Restore BIP39 seed to a hardware wallet such as a Trezor or Ledger
 
 ## Features ##
- * Builds Coreboot-heads firmware for all supported devices for measured boot
- * Determinsitic rom/iso generation for multi-party code->binary verification
+ * Determinsitic iso generation for multi-party code->binary verification
  * Small footprint (< 100MB)
  * Immutable and Diskless: runs from initramfs
  * Network support and most drivers removed to minimize exfiltration vectors
-
-## Supported Devices ##
-
-  | Device      | TPM Model      | TPM Version | Remote Attestation  |
-  |-------------|:--------------:|:-----------:|:-------------------:|
-  | Librem13v4  | Infineon 9465  | 1.2         | HOTP via Nitrokey   |
-  | Librem15v4  | Infineon 9456  | 1.2         | HOTP via Nitrokey   |
 
 ## Requirements ##
 
@@ -39,13 +31,13 @@ internet with high integrity on the supply chain of the firmware and OS used.
 
 ### Hardware ###
 
-* Supported PC already running coreboot-heads
-  * Ensure any Wifi/Disk/Bluetooth/Audio devices are removed
+* Recommended: PC running coreboot-heads
+  * Allows for signed builds, and verification of signed sd card payloads
+  * Ensure any Wifi/Disk/Bluetooth/Audio devices are disabled/removed
 * Supported remote attestation key (Librem Key, Nitrokey, etc)
 * Supported GPG smartcard device (Yubikey, Ledger, Trezor, Librem Key, etc)
 * Blank flash drive
 * Blank SD card
-
 
 ## Build ##
 
@@ -67,19 +59,15 @@ internet with high integrity on the supply chain of the firmware and OS used.
     make VERSION=1.0.0rc1 sign
     ```
 
-## Install ##
+## Setup ##
 
-1. Place contents of release/$VERSION folder on SD card
-2. Boot machine to Heads -> Options -> Flash/Update BIOS
-3. Flash firmware via "Flash the firmware with new ROM, erase settings"
-4. Insert external Remote attestation key and signing key when prompted
-6. Reboot and verify successful remote attestation
-7. Boot to shell: Options -> Recovery Shell
-8. Mount SD card
-9. Insert chosen GPG Smartcard device
-10. Sign target iso ```gpg --armor --detach-sign airgap*.iso```
-11. Reboot
-
+1. Insert external Remote attestation key and signing key when prompted
+2. Reboot and verify successful remote attestation
+3. Boot to shell: Options -> Recovery Shell
+4. Mount SD card
+5. Insert chosen GPG Smartcard device
+6. Sign target iso ```gpg --armor --detach-sign airgap*.iso```
+7. Reboot
 
 ## Usage ##
 
