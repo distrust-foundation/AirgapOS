@@ -15,6 +15,7 @@ cat << "EOF"
                  |___/      |_|
 EOF
 echo " Build Details:"
+echo "  - Version: $VERSION"
 echo "  - Date: $GIT_DATETIME"
 echo "  - Tree State: $GIT_STATE"
 echo "  - Committer: $GIT_AUTHOR"

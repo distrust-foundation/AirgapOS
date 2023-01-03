@@ -1,0 +1,13 @@
+debian-archive-keyring
+build-essential
+git
+libfaketime
+file
+wget
+cpio
+unzip
+rsync
+bc
+libncurses-dev
+python3
+libelf-dev
