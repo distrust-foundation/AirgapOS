@@ -61,12 +61,30 @@ internet with high integrity on the supply chain of the firmware and OS used.
 
 ## Setup ##
 
-1. Insert external Remote attestation key and signing key when prompted
-2. Reboot and verify successful remote attestation
-3. Boot to shell: Options -> Recovery Shell
-4. Mount SD card
-5. Insert chosen GPG Smartcard device
-6. Sign target iso ```gpg --armor --detach-sign airgap*.iso```
+Assumes target is running Pureboot or Coreboot/heads
+
+1. Boot to shell: ```Options -> Recovery Shell```
+2. Mount SD card
+	```
+	mount-usb
+	mount -o remount,rw /media
+	```
+3. Insert chosen GPG Smartcard device
+4. Initialize smartcard
+	```
+	gpg --card-status
+	```
+5. Sign target iso
+	```
+	cd /media
+	gpg --armor --detach-sign airgap.iso
+	```
+6. Unmount
+	```
+	cd
+	umount /media
+	sync
+	```
 7. Reboot
 
 ## Usage ##
