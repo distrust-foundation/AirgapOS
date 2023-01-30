@@ -3,7 +3,7 @@
 # Buildroot 2022.02.8-dirty Configuration
 #
 BR2_HAVE_DOT_CONFIG=y
-BR2_EXTERNAL_Airgap_PATH="/config/buildroot"
+BR2_EXTERNAL_Airgap_PATH="/home/build/config/buildroot"
 BR2_HOST_GCC_AT_LEAST_4_9=y
 BR2_HOST_GCC_AT_LEAST_5=y
 BR2_HOST_GCC_AT_LEAST_6=y
@@ -129,7 +129,7 @@ BR2_LUAROCKS_MIRROR="http://rocks.moonscript.org"
 BR2_CPAN_MIRROR="http://cpan.metacpan.org"
 BR2_JLEVEL=0
 BR2_CCACHE=y
-BR2_CCACHE_DIR="$(HOME)/build/buildroot-ccache"
+BR2_CCACHE_DIR="$(HOME)/cache/buildroot-ccache"
 BR2_CCACHE_INITIAL_SETUP=""
 BR2_CCACHE_USE_BASEDIR=y
 # BR2_ENABLE_DEBUG is not set
@@ -4500,7 +4500,7 @@ BR2_TARGET_UBOOT_CUSTOM_PATCH_DIR=""
 #
 
 #
-# Linux distribution for offline cryptography use cases (in /config/buildroot)
+# Linux distribution for offline cryptography use cases (in /home/build/config/buildroot)
 #
 
 #

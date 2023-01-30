@@ -1,9 +1,0 @@
-#!/bin/bash
-[ -f /.dockerenv ] || { echo "please run in supplied container"; exit 1; }
-set -e; source environment
-
-target=${TARGET?}
-
-cd /home/build/build/buildroot
-make linux-menuconfig
-make linux-update-defconfig

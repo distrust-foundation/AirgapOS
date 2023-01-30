@@ -1,9 +1,0 @@
-#!/bin/bash
-[ -f /.dockerenv ] || { echo "please run in supplied container"; exit 1; }
-source environment
-set -e
-
-qemu-system-i386 \
-	-M pc \
-	-nographic \
-	-cdrom "${HOME}/release/${TARGET}/airgap.iso"
