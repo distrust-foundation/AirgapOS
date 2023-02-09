@@ -1,1 +1,1 @@
-release/1.0.0rc2/airgap.iso filter=lfs diff=lfs merge=lfs -text
+release/*/*.iso filter=lfs diff=lfs merge=lfs -text
