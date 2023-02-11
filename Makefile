@@ -6,7 +6,7 @@ include $(PWD)/src/toolchain/Makefile
 clean: toolchain
 	rm -f $(OUT_DIR) $(CACHE_DIR)/buildroot-ccache || :
 	$(call toolchain,$(USER)," \
-		cd $(CACHE_DIR)/buildroot; \
+		cd $(FETCH_DIR)/buildroot; \
 		make clean; \
 	")
 
@@ -18,17 +18,17 @@ mrproper:
 .PHONY: menuconfig
 menuconfig: toolchain
 	$(call toolchain,$(USER)," \
-		cd $(CACHE_DIR)/buildroot; \
-    	make "airgap_$(TARGET)_defconfig"; \
+		cd $(FETCH_DIR)/buildroot; \
+		make "airgap_$(TARGET)_defconfig"; \
 		make menuconfig; \
 	")
-	cp $(CACHE_DIR)/buildroot/.config \
+	cp $(FETCH_DIR)/buildroot/.config \
 	"config/buildroot/configs/airgap_$(TARGET)_defconfig"
 
 .PHONY: linux-menuconfig
 linux-menuconfig: toolchain
 	$(call toolchain,$(USER),"\
-		cd $(CACHE_DIR)/buildroot; \
+		cd $(FETCH_DIR)/buildroot; \
 		make linux-menuconfig; \
 		make linux-update-defconfig; \
 	")
@@ -46,26 +46,26 @@ vm: toolchain
 release: | \
 	$(OUT_DIR)/airgap.iso \
 	$(OUT_DIR)/manifest.txt
-	mkdir -p $(RELEASE_DIR)
-	cp $(OUT_DIR)/release.env $(RELEASE_DIR)/release.env
-	cp $(OUT_DIR)/airgap.iso $(RELEASE_DIR)/airgap.iso
-	cp $(OUT_DIR)/manifest.txt $(RELEASE_DIR)/manifest.txt
+	mkdir -p $(DIST_DIR)
+	cp $(OUT_DIR)/release.env $(DIST_DIR)/release.env
+	cp $(OUT_DIR)/airgap.iso $(DIST_DIR)/airgap.iso
+	cp $(OUT_DIR)/manifest.txt $(DIST_DIR)/manifest.txt
 
-$(CACHE_DIR)/buildroot: toolchain
+$(FETCH_DIR)/buildroot: toolchain
 	$(call git_clone,buildroot,$(BUILDROOT_REPO),$(BUILDROOT_REF))
 
 $(OUT_DIR)/airgap.iso: \
 	toolchain \
-	$(CACHE_DIR)/buildroot \
+	$(FETCH_DIR)/buildroot \
 	$(OUT_DIR)/release.env
-	$(call apply_patches,$(CACHE_DIR)/buildroot,$(BR2_EXTERNAL)/patches)
+	$(call apply_patches,$(FETCH_DIR)/buildroot,$(BR2_EXTERNAL)/patches)
 	$(call toolchain,$(USER)," \
-    	cd $(CACHE_DIR)/buildroot; \
+    	cd $(FETCH_DIR)/buildroot; \
     	make "airgap_$(TARGET)_defconfig"; \
 		unset FAKETIME; \
 		make source; \
 		make; \
 	")
 	mkdir -p $(OUT_DIR)
-	cp $(CACHE_DIR)/buildroot/output/images/rootfs.iso9660 \
+	cp $(FETCH_DIR)/buildroot/output/images/rootfs.iso9660 \
 		$(OUT_DIR)/airgap.iso
