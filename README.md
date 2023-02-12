@@ -44,19 +44,19 @@ internet with high integrity on the supply chain of the firmware and OS used.
 ### Build a new release
 
     ```
-    make VERSION=1.0.0rc1 release
+    make release
     ```
 
 ### Reproduce an existing release
 
     ```
-    make VERSION=1.0.0rc1 attest
+    make attest
     ```
 
 ### Sign an existing release
 
     ```
-    make VERSION=1.0.0rc1 sign
+    make sign
     ```
 
 ## Setup ##
