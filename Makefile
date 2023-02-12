@@ -4,7 +4,7 @@ include $(PWD)/src/toolchain/Makefile
 
 .PHONY: clean
 clean: toolchain
-	rm -f $(OUT_DIR) $(CACHE_DIR)/buildroot-ccache || :
+	rm -rf $(OUT_DIR) $(CACHE_DIR)/buildroot-ccache || :
 	$(call toolchain,$(USER)," \
 		cd $(FETCH_DIR)/buildroot; \
 		make clean; \
@@ -39,11 +39,11 @@ vm: toolchain
 		qemu-system-i386 \
 			-M pc \
 			-nographic \
-			-cdrom "${HOME}/release/${TARGET}/airgap.iso"; \
+			-cdrom "$(OUT_DIR)/airgap.iso"; \
 	")
 
 .PHONY: release
-release: | \
+release: \
 	$(OUT_DIR)/airgap.iso \
 	$(OUT_DIR)/manifest.txt
 	mkdir -p $(DIST_DIR)
@@ -52,20 +52,18 @@ release: | \
 	cp $(OUT_DIR)/manifest.txt $(DIST_DIR)/manifest.txt
 
 $(FETCH_DIR)/buildroot: toolchain
-	$(call git_clone,buildroot,$(BUILDROOT_REPO),$(BUILDROOT_REF))
+	$(call git_clone,$(FETCH_DIR)/buildroot,$(BUILDROOT_REPO),$(BUILDROOT_REF))
 
 $(OUT_DIR)/airgap.iso: \
-	toolchain \
 	$(FETCH_DIR)/buildroot \
 	$(OUT_DIR)/release.env
-	$(call apply_patches,$(FETCH_DIR)/buildroot,$(BR2_EXTERNAL)/patches)
+	$(call apply_patches,$(FETCH_DIR)/buildroot,$(CONFIG_DIR)/buildroot/patches)
 	$(call toolchain,$(USER)," \
-    	cd $(FETCH_DIR)/buildroot; \
-    	make "airgap_$(TARGET)_defconfig"; \
+		cd $(FETCH_DIR)/buildroot; \
+		make "airgap_$(TARGET)_defconfig"; \
 		unset FAKETIME; \
 		make source; \
 		make; \
 	")
-	mkdir -p $(OUT_DIR)
 	cp $(FETCH_DIR)/buildroot/output/images/rootfs.iso9660 \
 		$(OUT_DIR)/airgap.iso
