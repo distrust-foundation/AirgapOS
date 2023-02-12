@@ -4,7 +4,6 @@ include $(PWD)/src/toolchain/Makefile
 .PHONY: default
 default: \
 	toolchain \
-	$(DEFAULT_GOAL) \
 	$(OUT_DIR)/airgap.iso \
 	$(OUT_DIR)/release.env \
 	$(OUT_DIR)/manifest.txt
@@ -50,10 +49,7 @@ vm: toolchain
 	")
 
 .PHONY: release
-release: \
-	default \
-	$(OUT_DIR)/airgap.iso \
-	$(OUT_DIR)/manifest.txt
+release: default
 	mkdir -p $(DIST_DIR)
 	cp $(OUT_DIR)/release.env $(DIST_DIR)/release.env
 	cp $(OUT_DIR)/airgap.iso $(DIST_DIR)/airgap.iso
