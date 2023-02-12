@@ -1,6 +1,13 @@
 include $(PWD)/src/toolchain/Makefile
 
-.DEFAULT_GOAL := $(OUT_DIR)/airgap.iso
+.DEFAULT_GOAL :=
+.PHONY: default
+default: \
+	toolchain \
+	$(DEFAULT_GOAL) \
+	$(OUT_DIR)/airgap.iso \
+	$(OUT_DIR)/release.env \
+	$(OUT_DIR)/manifest.txt
 
 .PHONY: clean
 clean: toolchain
@@ -44,6 +51,7 @@ vm: toolchain
 
 .PHONY: release
 release: \
+	default \
 	$(OUT_DIR)/airgap.iso \
 	$(OUT_DIR)/manifest.txt
 	mkdir -p $(DIST_DIR)
