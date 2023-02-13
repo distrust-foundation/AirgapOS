@@ -1,0 +1,2 @@
+c10c7a1f40fc70061a9686ee64f48b36c4adda1246508ccc69fe309c33d15ddd out/airgap.iso
+bcdefff53d90e063ef4e10bb84058dd5cd6f91a126d6a21c01898d4b58812683 out/release.env
