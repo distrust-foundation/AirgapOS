@@ -10,11 +10,12 @@ default: \
 
 .PHONY: clean
 clean: toolchain
-	rm -rf $(OUT_DIR) $(CACHE_DIR)/buildroot-ccache || :
+	rm -rf $(CACHE_DIR)/buildroot-ccache
 	$(call toolchain,$(USER)," \
 		cd $(FETCH_DIR)/buildroot; \
 		make clean; \
 	")
+	$(MAKE) toolchain-clean
 
 .PHONY: mrproper
 mrproper:
