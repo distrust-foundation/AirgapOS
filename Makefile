@@ -17,6 +17,30 @@ clean: toolchain
 	")
 	$(MAKE) toolchain-clean
 
+.PHONY: sign
+sign:
+	set -e; \
+	git config --get user.signingkey 2>&1 >/dev/null || { \
+		echo "Error: git user.signingkey is not defined"; \
+		exit 1; \
+	}; \
+	fingerprint=$$(\
+		git config --get user.signingkey \
+		| sed 's/.*\([A-Z0-9]\{16\}\).*/\1/g' \
+	); \
+	gpg --armor \
+		--detach-sig  \
+		--output $(RELEASE_DIR)/manifest.$${fingerprint}.asc \
+		$(RELEASE_DIR)/manifest.txt
+
+.PHONY: verify
+verify: | $(RELEASE_DIR)/manifest.txt
+	set -e; \
+	for file in $(RELEASE_DIR)/manifest.*.asc; do \
+		echo "\nVerifying: $${file}\n"; \
+		gpg --verify $${file} $(RELEASE_DIR)/manifest.txt; \
+	done;
+
 .PHONY: mrproper
 mrproper:
 	docker image rm -f $(IMAGE)
