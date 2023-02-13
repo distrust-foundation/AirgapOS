@@ -1269,7 +1269,7 @@ BR2_PACKAGE_KBD=y
 #
 # openpowerlink needs a toolchain w/ C++, threads
 #
-# BR2_PACKAGE_PARTED is not set
+BR2_PACKAGE_PARTED=y
 BR2_PACKAGE_PCIUTILS=y
 # BR2_PACKAGE_PDBG is not set
 # BR2_PACKAGE_PICOCOM is not set
