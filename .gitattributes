@@ -1,1 +1,1 @@
-release/*/*.iso filter=lfs diff=lfs merge=lfs -text
+dist/*.iso filter=lfs diff=lfs merge=lfs -text
