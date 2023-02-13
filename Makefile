@@ -51,10 +51,8 @@ vm: toolchain
 
 .PHONY: release
 release: default
-	mkdir -p $(DIST_DIR)
-	cp $(OUT_DIR)/release.env $(DIST_DIR)/release.env
-	cp $(OUT_DIR)/airgap.iso $(DIST_DIR)/airgap.iso
-	cp $(OUT_DIR)/manifest.txt $(DIST_DIR)/manifest.txt
+	rm -rf $(DIST_DIR)/*
+	cp -R $(OUT_DIR)/* $(DIST_DIR)/
 
 $(FETCH_DIR)/buildroot: toolchain
 	$(call git_clone,$(FETCH_DIR)/buildroot,$(BUILDROOT_REPO),$(BUILDROOT_REF))
