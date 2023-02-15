@@ -17,7 +17,6 @@ EOF
 echo " Build Details:"
 echo "  - Version: $VERSION"
 echo "  - Date: $GIT_TIMESTAMP"
-echo "  - Tree State: $GIT_STATE"
 echo "  - Committer: $GIT_AUTHOR"
 echo "  - Commit: $GIT_REF"
 echo "  - Key: $GIT_KEY"
